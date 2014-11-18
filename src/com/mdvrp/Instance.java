@@ -24,6 +24,7 @@ public class Instance {
 	private Route[][] routes;
 	private Random random 					= new Random();
 	private Parameters parameters;
+	private double[][] spaceTimeDistances;
 	
 	public Instance(Parameters parameters) 
 	{
@@ -280,6 +281,76 @@ public class Instance {
 					distances[j][i] = distances[i][j];
 				}
 			}		
+	}
+	
+	/**
+	 * Calculate the symmetric euclidean matrix of costs based on spatial distance and the distance between time windows
+	 */
+	public void calculateSpaceTimeDistance() {
+		spaceTimeDistances = new double[customersNr + depotsNr][customersNr + depotsNr];
+		for (int i = 0; i  < customersNr + depotsNr - 1; ++i)
+			for (int j = i + 1; j < customersNr +  depotsNr; ++j) {
+				//case both customers
+				if(i < customersNr && j < customersNr){
+					spaceTimeDistances[i][j] = Math.sqrt(Math.pow(customers.get(i).getXCoordinate() - customers.get(j).getXCoordinate(), 2)
+										+ Math.pow(customers.get(i).getYCoordinate() - customers.get(j).getYCoordinate(), 2)
+										+ Math.pow((customers.get(i).getEndTw() - customers.get(i).getStartTw()) - (customers.get(j).getEndTw() - customers.get(j).getStartTw()), 2));
+					spaceTimeDistances[j][i] = spaceTimeDistances[i][j];
+					
+				// case customer and depot					
+				}else if(i < customersNr && j >= customersNr){
+					int d = j - customersNr; // depot number in the instance list
+					spaceTimeDistances[i][j] = Math.sqrt(Math.pow(customers.get(i).getXCoordinate() - depots.get(d).getXCoordinate(), 2)
+							+ Math.pow(customers.get(i).getYCoordinate() - depots.get(d).getYCoordinate(), 2));
+					spaceTimeDistances[j][i] = spaceTimeDistances[i][j];
+				
+				// case both depots
+				}else if(i >= customersNr && j >= customersNr){
+					int d1 = i - customersNr; // first depot number in the instance list
+					int d2 = j - customersNr; // second depot number in the instance list
+					spaceTimeDistances[i][j] = Math.sqrt(Math.pow(depots.get(d1).getXCoordinate() - depots.get(d2).getXCoordinate(), 2)
+							+ Math.pow(depots.get(d1).getYCoordinate() - depots.get(d2).getYCoordinate(), 2));
+					spaceTimeDistances[j][i] = spaceTimeDistances[i][j];
+				}
+			}		
+	}
+	
+	/**
+	 * 
+	 * @param 
+	 * @return the index of the customer nearest to the selected depot not yet assigned to
+	 * 	a route. Does not make distinction between customers assigned and not assigned 
+	 * 	to the selected depot. i.e. works only with one depot. 
+	 * 
+	 */
+	public int getUnassignedCustomerNearestToDepot(){
+		int nearestCustomer = 0;
+		int j = customersNr;
+		for(int i=0; i<customersNr; i++){
+			if(spaceTimeDistances[j][i] < spaceTimeDistances[j][nearestCustomer])
+				if(customers.get(nearestCustomer).getAssignedRoute() != -1)
+					nearestCustomer = i;
+		}
+		
+		return nearestCustomer;
+	}
+	
+	/**
+	 * 
+	 * @param customerIndex
+	 * @return the index of the customer nearest to the selected customer among all customers
+	 * 			not yet assigned to a route. Works with one depot only.
+	 */
+	public int getUnassignedCustomerNearestToCustomer(int customerIndex){
+		int nearestCustomer = 0;
+		int j = customerIndex;
+		for(int i=0; i<customersNr; i++){
+			if(spaceTimeDistances[j][i] < spaceTimeDistances[j][nearestCustomer])
+				if(customers.get(nearestCustomer).getAssignedRoute() != -1)
+					nearestCustomer = i;
+		}
+		
+		return nearestCustomer;
 	}
 	
 	/**

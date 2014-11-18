@@ -1,4 +1,4 @@
-﻿package com.mdvrp;
+package com.mdvrp;
 
 import java.io.FileWriter;
 import java.io.PrintStream;
@@ -11,8 +11,8 @@ import com.TabuSearch.MySearchProgram;
 import com.TabuSearch.MySolution;
 import com.TabuSearch.MyTabuList;
 
-public class MDVRPTW {
-		
+public class MDVRPTW_NearestNeighbor {
+
 	public static void main(String[] args) {
 		MySearchProgram     search;
 		MySolution          initialSol;
@@ -39,7 +39,7 @@ public class MDVRPTW {
 			instance.populateFromHombergFile(parameters.getInputFileName());
 						
 			// Init memory for Tabu Search
-			initialSol 		= new MySolution(instance, RoutesInitialization.RANDOM);
+			initialSol 		= new MySolution(instance, RoutesInitialization.NEAREST_NEIGHBOR);
 			objFunc 		= new MyObjectiveFunction(instance);
 	        moveManager 	= new MyMoveManager(instance);
 	        moveManager.setMovesType(parameters.getMovesType());
@@ -86,6 +86,6 @@ public class MDVRPTW {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
+
 }

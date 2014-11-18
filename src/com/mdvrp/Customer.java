@@ -22,6 +22,8 @@ public class Customer {
 	private double twViol;              // value of time window violation, 0 if none
 	private double[] anglesToDepots;
 	
+	private int assignedRoute = -1;
+	
 	public Customer() {
 		xCoordinate          = 0;
 		yCoordinate          = 0;
@@ -76,6 +78,22 @@ public class Customer {
 		print.append("\n" + "--------------------------------------------------");
 		return print.toString();
 		
+	}
+	
+	/**
+	 * Sets the index of the assigned route
+	 * @param assignedRoute
+	 */
+	public void setAssignedRoute(int assignedRoute){
+		this.assignedRoute = assignedRoute;
+	}
+	
+	/**
+	 * Returns the index of the assigned route. -1 if it is not assigned to any route.
+	 * @return assignedRoute
+	 */
+	public int getAssignedRoute(){
+		return assignedRoute;
 	}
 	
 	/**

@@ -8,6 +8,7 @@ import com.mdvrp.Cost;
 import com.mdvrp.Customer;
 import com.mdvrp.Instance;
 import com.mdvrp.Route;
+import com.mdvrp.RoutesInitialization;
 import com.mdvrp.Vehicle;
 
 @SuppressWarnings("serial")
@@ -29,11 +30,16 @@ public class MySolution extends SolutionAdapter{
 	
 	public MySolution() {} // Appease clone()
 
-	public MySolution(Instance instance) {
+	public MySolution(Instance instance, RoutesInitialization routesInitialization) {
 		MySolution.setInstance(instance);
 		cost = new Cost();
 		initializeRoutes(instance);
-		buildInitialRoutes1(instance);
+		if(routesInitialization == RoutesInitialization.RANDOM){
+			buildInitialRoutes1(instance);
+		}else if(routesInitialization == RoutesInitialization.NEAREST_NEIGHBOR){
+			instance.calculateSpaceTimeDistance();
+			buildInitialRoutesWithNearestNeighbor(instance);
+		}
 		// used for input routes from file
 		alpha 	= 1;
     	beta 	= 1;
@@ -45,7 +51,6 @@ public class MySolution extends SolutionAdapter{
     	MySolution.setIterationsDone(0);
     	Bs = new int[instance.getCustomersNr()][instance.getVehiclesNr()][instance.getDepotsNr()];		
 	}
-	
 	
 	public Object clone()
     {   
@@ -213,6 +218,66 @@ public class MySolution extends SolutionAdapter{
 		}
 	}
 	
+	/**
+	 * Builds the initial routes using a Nearest Neighbor algorithm where the distance between customers
+	 * is evaluated as the distance between their spatial position and the distance between their time windows.
+	 * Initial routes are not guaranteed to be optimal, nor to respect all constraints.
+	 * @param instance
+	 */
+	private void buildInitialRoutesWithNearestNeighbor(Instance instance){
+		Route route; // stores the pointer to the current route
+		Customer customerChosenPtr; // stores the pointer to the customer chosen from depots list assigned customers
+		StringBuffer debug = new StringBuffer();
+		int assignedCustomersNr;
+		int startCustomer;
+		int customerChosen; // serve to cycle j, j+1, ... assignedcustomersnr, 0, ... j-1
+		int lastCustomer;
+		
+		assignedCustomersNr = instance.getDepot(0).getAssignedCustomersNr();
+		if(instance.getParameters().getStartClient() != -1) {
+			startCustomer = instance.getParameters().getStartClient();
+		}else{
+			startCustomer = instance.getUnassignedCustomerNearestToDepot();
+			instance.getParameters().setStartClient(startCustomer);
+		}
+		// cycle the entire list of customers starting from the nearest to the depot
+		for (int j = 0; j < assignedCustomersNr; ++j) {
+			customerChosen = instance.getUnassignedCustomerNearestToDepot();
+			customerChosenPtr = instance.getDepot(0).getAssignedCustomer(customerChosen);
+			int k;
+			for(k= 0; k < instance.getVehiclesNr(); k++){
+				
+				route = routes[0][k];
+				//Case route is empty
+				if(route.getCustomersLength() == 0){
+					customerChosen = instance.getUnassignedCustomerNearestToDepot();
+					customerChosenPtr = instance.getDepot(0).getAssignedCustomer(customerChosen);
+				}else{
+					//Case route is not empty
+					lastCustomer = route.getCustomerNr(route.getCustomersLength()-1);
+					customerChosen = instance.getUnassignedCustomerNearestToCustomer(lastCustomer);
+					customerChosenPtr = instance.getDepot(0).getAssignedCustomer(customerChosen);
+				}
+				
+				//Add customer to the route if it respects the constraints
+				if (customerChosenPtr.getCapacity() + route.getCost().load <= route.getLoadAdmited()
+					&& customerChosenPtr.getServiceDuration() + route.getDuration()  <= route.getDurationAdmited()){
+					customerChosenPtr.setAssignedRoute(k);
+					insertBestTravel(instance, route, customerChosenPtr);
+					evaluateRoute(route);
+					break;
+				}
+			} // end for routes
+			// if the customer was not inserted and we reach the last route
+			// insert it anyway
+			if(k == instance.getVehiclesNr() - 1){
+				customerChosenPtr.setAssignedRoute(k);
+				insertBestTravel(instance, routes[0][k], customerChosenPtr);
+				evaluateRoute(routes[0][k]);
+			}
+		} // end for customer list
+		
+	}
 	
 	private void insertBestTravel(Instance instance, Route route, Customer customerChosenPtr) {
 		double minCost = Double.MAX_VALUE;
