@@ -30,9 +30,10 @@ public class MySearchProgram implements TabuSearchListener{
 	//new parameters
 		int new_TabuTenure;
 		int counter;
-		private static final int tenureMax = 20;//10-20/100-400 ; 1-9/1-100 ; 20-30/400-900 
-		private static final int tenureMin = 10;
+		private static int tenureMax;//10-20/100-400 ; 1-9/1-100 ; 20-30/400-900 
+		private static int tenureMin;
 		private static final int countTenure = 20;
+		private static final int range = 10;
 	
 	public MySearchProgram(Instance instance, Solution initialSol, MoveManager moveManager, ObjectiveFunction objFunc, TabuList tabuList, boolean minmax, PrintStream outPrintStream)
 	{
@@ -40,6 +41,14 @@ public class MySearchProgram implements TabuSearchListener{
 		feasibleIndex = -1;
 		bestIndex = 0;
 		this.instance = instance;
+		
+		//set tenure range
+		tenureMax = (int) Math.sqrt(instance.getCustomersNr());	
+		
+		if(tenureMax<=range)
+			tenureMin = 1;
+		else
+			tenureMin = tenureMax - range;
 		
 		this.graphicsVisible = instance.getParameters().isGraphics();
 		MySearchProgram.setIterationsDone(0);
