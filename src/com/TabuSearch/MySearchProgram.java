@@ -13,6 +13,10 @@ public class MySearchProgram implements TabuSearchListener{
 	public TabuSearch tabuSearch;
 	private MySolution sol;
 	public Instance instance;
+	
+	public DrawPanel panel;
+	private boolean graphicsVisible;
+	
 	public Route[][] feasibleRoutes; // stores the routes of the feasible solution if any
 	public Cost feasibleCost;		 // stores the total cost of feasible solution if any, otherwise totalcostviol = Double.Infinity
 	public Route[][] bestRoutes;	 // stores the routes of with the best travel time
@@ -23,19 +27,20 @@ public class MySearchProgram implements TabuSearchListener{
 	public int bestIndex;
 	public DecimalFormat df = new DecimalFormat("#.##");
 	
-	//new parameters
-	int new_TabuTenure;
-	int counter;
-	private static final int tenureMax = 20;
-	private static final int tenureMin = 10;
-	private static final int countTenure = 20;
-	
 	public MySearchProgram(Instance instance, Solution initialSol, MoveManager moveManager, ObjectiveFunction objFunc, TabuList tabuList, boolean minmax, PrintStream outPrintStream)
 	{
 		tabuSearch = new MultiThreadedTabuSearch(initialSol, moveManager, objFunc,tabuList,	new BestEverAspirationCriteria(), minmax );
 		feasibleIndex = -1;
 		bestIndex = 0;
 		this.instance = instance;
+		
+		this.graphicsVisible = instance.getParameters().isGraphics();
+		MySearchProgram.setIterationsDone(0);
+		//this.graphicsVisible = graphicsV;
+		if(graphicsVisible) {
+			panel = new DrawPanel(instance);
+		}
+		
 		MySearchProgram.setIterationsDone(0);
 		tabuSearch.addTabuSearchListener( this );
 		tabuSearch.addTabuSearchListener((MyTabuList)tabuList);
@@ -52,6 +57,12 @@ public class MySearchProgram implements TabuSearchListener{
 		bestCost 	= getCostFromObjective(sol.getObjectiveValue());
 		bestRoutes 	= cloneRoutes(sol.getRoutes());
 		bestIndex 	= tabuSearch.getIterationsCompleted() + 1; // plus the current one
+		
+		if(graphicsVisible) {
+			panel.bestCost = bestCost;
+			panel.bestIndex = bestIndex;
+			panel.repaint();
+		}
 	}
 
 	/**
@@ -75,14 +86,25 @@ public class MySearchProgram implements TabuSearchListener{
 			feasibleRoutes = cloneRoutes(sol.getRoutes());
 			// set the new best to the current one
 			tabuSearch.setBestSolution(sol);
-			System.out.println("It " + tabuSearch.getIterationsCompleted() +" - New solution " + sol.getCost().total+ " tabuTenure " + instance.getParameters().getTabuTenure());
-			//if tenure >1 set to 1
-			if(instance.getParameters().getTabuTenure()>tenureMin){
-				synchronized(instance){
-					instance.getParameters().setTabuTenure(tenureMin);
-				}
+			
+			if(graphicsVisible) {
+				panel.feasibleCost = feasibleCost;
+				panel.feasibleIndex = panel.iterations;
 			}
-			counter=1;
+			
+			System.out.println("It " + tabuSearch.getIterationsCompleted() +" - New solution " + sol.getCost().total);
+		}
+		
+		if(graphicsVisible) {
+			currentRoutes = cloneRoutes(sol.getRoutes());
+			panel.iterations++;
+			panel.currentCost = currentCost;
+			panel.routes = currentRoutes;
+			panel.alpha = sol.getAlpha();
+			panel.beta = sol.getBeta();
+			panel.gamma = sol.getGamma();
+			panel.repaint();
+
 		}
 		
 		sol.updateParameters(sol.getObjectiveValue()[3], sol.getObjectiveValue()[4], sol.getObjectiveValue()[5]);
@@ -108,6 +130,19 @@ public class MySearchProgram implements TabuSearchListener{
 		}
 		feasibleRoutes = cloneRoutes(sol.getRoutes());
 		bestRoutes = feasibleRoutes;
+		
+		// initialize the graphics
+		if(graphicsVisible) {
+			panel.initializeGraphics(panel);
+			panel.routes = feasibleRoutes;
+			panel.feasibleCost = feasibleCost;
+			panel.currentCost = feasibleCost;
+			panel.bestCost = bestCost;
+			panel.alpha = sol.getAlpha();
+			panel.beta = sol.getBeta();
+			panel.gamma = sol.getGamma();
+			panel.repaint();
+		}
 	}
 
 	@Override
@@ -127,18 +162,7 @@ public class MySearchProgram implements TabuSearchListener{
 	}
 
 	@Override
-	public void unimprovingMoveMade(TabuSearchEvent event) {
-		//System.out.println("It " + tabuSearch.getIterationsCompleted() +" - Bad solution " + instance.getParameters().getTabuTenure());
-		//improve tenure
-		synchronized(instance){
-			
-			if(instance.getParameters().getTabuTenure()<tenureMax && counter>=countTenure){
-				instance.getParameters().setTabuTenure(instance.getParameters().getTabuTenure()+1);
-				counter=0;
-			}
-			counter++;
-		}
-	}
+	public void unimprovingMoveMade(TabuSearchEvent event) {}
 	
 	// return a new created cost from the objective vector passed as parameter
 	private Cost getCostFromObjective(double[] objective) {

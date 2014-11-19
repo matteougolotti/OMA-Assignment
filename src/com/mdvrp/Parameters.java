@@ -13,6 +13,7 @@ public class Parameters {
 	private int tabuTenure;
 	private boolean variableTenure;
 	private String currDir;
+	private boolean graphics;
 	
 	public Parameters() {
 		currDir 			= System.getProperty("user.dir");
@@ -24,6 +25,7 @@ public class Parameters {
 		tabuTenure        	= -1;
 		randomSeed		  	= -1;
 		variableTenure    	= false;
+		graphics          	= false;
 	}
 	
 	public void updateParameters(String[] args) throws Exception
@@ -63,6 +65,15 @@ public class Parameters {
 						}else {
 							System.out.println("Variable tenure argument must be true of false. Set to default false!");
 							throw new Exception();
+						}
+						break;
+					case "-g":
+						if(args[i+1].equalsIgnoreCase("on")){
+							setGraphics(true);
+						}else if(args[i+1].equalsIgnoreCase("off")){
+							setGraphics(false);
+						}else {
+							System.out.println("Graphics argument must be on of off. Set to default off!");
 						}
 						break;
 					default: {
@@ -215,5 +226,19 @@ public class Parameters {
 
 	public void setCurrDir(String currDir) {
 		this.currDir = currDir;
+	}
+	
+	/**
+	 * @return the graphics
+	 */
+	public boolean isGraphics() {
+		return graphics;
+	}
+
+	/**
+	 * @param graphics the graphics to set
+	 */
+	public void setGraphics(boolean graphics) {
+		this.graphics = graphics;
 	}
 }

@@ -39,7 +39,7 @@ public class MDVRPTW {
 			instance.populateFromHombergFile(parameters.getInputFileName());
 						
 			// Init memory for Tabu Search
-			initialSol 		= new MySolution(instance, RoutesInitialization.RANDOM);
+			initialSol 		= new MySolution(instance);
 			objFunc 		= new MyObjectiveFunction(instance);
 	        moveManager 	= new MyMoveManager(instance);
 	        moveManager.setMovesType(parameters.getMovesType());
