@@ -7,8 +7,8 @@ import com.softtechdesign.ga.GASequenceList;
 public class GAInitialSolution extends GASequenceList {
 
 	public GAInitialSolution() throws GAException {
-		super(  20, //size of chromosome
-                300, //population has N chromosomes
+		super(  20, //size of chromosome (number of customers + number of vehicles)
+                300, //population has N chromosomes (eventualmente parametrizzabile)
                 0.7, //crossover probability
                 10, //random selection chance % (regardless of fitness)
                 2000, //max generations
@@ -19,6 +19,7 @@ public class GAInitialSolution extends GASequenceList {
                 "ABCDEFGHIJKLMNOPQRST", //gene space (possible gene values)
                 Crossover.ctTwoPoint, //crossover type
                 true); //compute statisitics?
+		
 	}
 
 	@Override
