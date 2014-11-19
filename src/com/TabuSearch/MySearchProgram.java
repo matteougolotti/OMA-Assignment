@@ -30,7 +30,7 @@ public class MySearchProgram implements TabuSearchListener{
 	//new parameters
 		int new_TabuTenure;
 		int counter;
-		private static final int tenureMax = 20;
+		private static final int tenureMax = 20;//10-20/100-400 ; 1-9/1-100 ; 20-30/400-900 
 		private static final int tenureMin = 10;
 		private static final int countTenure = 20;
 	
