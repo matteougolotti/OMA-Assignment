@@ -27,6 +27,13 @@ public class MySearchProgram implements TabuSearchListener{
 	public int bestIndex;
 	public DecimalFormat df = new DecimalFormat("#.##");
 	
+	//new parameters
+		int new_TabuTenure;
+		int counter;
+		private static final int tenureMax = 20;
+		private static final int tenureMin = 10;
+		private static final int countTenure = 20;
+	
 	public MySearchProgram(Instance instance, Solution initialSol, MoveManager moveManager, ObjectiveFunction objFunc, TabuList tabuList, boolean minmax, PrintStream outPrintStream)
 	{
 		tabuSearch = new MultiThreadedTabuSearch(initialSol, moveManager, objFunc,tabuList,	new BestEverAspirationCriteria(), minmax );
@@ -92,7 +99,14 @@ public class MySearchProgram implements TabuSearchListener{
 				panel.feasibleIndex = panel.iterations;
 			}
 			
-			System.out.println("It " + tabuSearch.getIterationsCompleted() +" - New solution " + sol.getCost().total);
+			System.out.println("It " + tabuSearch.getIterationsCompleted() +" - New solution " + sol.getCost().total+ " tabuTenure " + instance.getParameters().getTabuTenure());
+			//if tenure >1 set to 1
+			if(instance.getParameters().getTabuTenure()>tenureMin){
+				synchronized(instance){
+					instance.getParameters().setTabuTenure(tenureMin);
+				}
+			}
+			counter=1;
 		}
 		
 		if(graphicsVisible) {
@@ -162,7 +176,18 @@ public class MySearchProgram implements TabuSearchListener{
 	}
 
 	@Override
-	public void unimprovingMoveMade(TabuSearchEvent event) {}
+	public void unimprovingMoveMade(TabuSearchEvent event) {
+		//System.out.println("It " + tabuSearch.getIterationsCompleted() +" - Bad solution " + instance.getParameters().getTabuTenure());
+				//improve tenure
+				synchronized(instance){
+					
+					if(instance.getParameters().getTabuTenure()<tenureMax && counter>=countTenure){
+						instance.getParameters().setTabuTenure(instance.getParameters().getTabuTenure()+1);
+						counter=0;
+					}
+					counter++;
+				}
+	}
 	
 	// return a new created cost from the objective vector passed as parameter
 	private Cost getCostFromObjective(double[] objective) {
