@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="C:/Users/filippo/Documents/Downloads/JavaGALib/JavaGALibCodeAndJAR/GA Lib/dist/GAlib.jar"/>
-	<classpathentry kind="lib" path="GAlib.jar"/>
+	<classpathentry exported="true" kind="lib" path="GAlib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

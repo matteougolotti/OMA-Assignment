@@ -2,11 +2,27 @@ package com.mdvrp;
 
 import com.softtechdesign.ga.Crossover;
 import com.softtechdesign.ga.GAException;
-import com.softtechdesign.ga.GASequenceList;
+import com.softtechdesign.ga.GAStringsSeq;
 
-public class GAInitialSolution extends GASequenceList {
+public class GAInitialSolution extends GAStringsSeq {
 
-	public GAInitialSolution() throws GAException {
+	/**
+     * Initialize the GAStringSeq
+     * @param chromosomeDim
+     * @param populationDim
+     * @param crossoverProb
+     * @param randomSelectionChance
+     * @param maxGenerations
+     * @param numPrelimRuns
+     * @param maxPrelimGenerations
+     * @param mutationProb
+     * @param chromDecPts
+     * @param possGeneValues
+     * @param crossoverType
+     * @param computeStatistics
+     * @throws GAException
+     */
+	public GAInitialSolution(String genes[]) throws GAException {
 		super(  20, //size of chromosome (number of customers + number of vehicles)
                 300, //population has N chromosomes (eventualmente parametrizzabile)
                 0.7, //crossover probability
@@ -16,7 +32,7 @@ public class GAInitialSolution extends GASequenceList {
                 25, //max generations per prelim run
                 0.06, //chromosome mutation prob.
                 0, //number of decimal places in chrom
-                "ABCDEFGHIJKLMNOPQRST", //gene space (possible gene values)
+                genes, //gene space (possible gene values)
                 Crossover.ctTwoPoint, //crossover type
                 true); //compute statisitics?
 		
