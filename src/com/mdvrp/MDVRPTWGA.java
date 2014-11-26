@@ -13,7 +13,8 @@ import com.TabuSearch.MyTabuList;
 import com.softtechdesign.ga.ChromStrings;
 
 public class MDVRPTWGA {
-		
+	public static Instance instance;	
+	
 	public static void main(String[] args) {
 		MySearchProgram     search;
 		MySolution          initialSol;
@@ -21,7 +22,7 @@ public class MDVRPTWGA {
 		MyMoveManager       moveManager;
 		TabuList            tabuList;
 		Parameters          parameters 		= new Parameters(); 	// holds all the parameters passed from the input line
-		Instance            instance; 								// holds all the problem data extracted from the input file
+		//Instance            instance; 								// holds all the problem data extracted from the input file
 		Duration            duration 		= new Duration(); 		// used to calculate the elapsed time
 		PrintStream         outPrintSream 	= null;					// used to redirect the output
 		

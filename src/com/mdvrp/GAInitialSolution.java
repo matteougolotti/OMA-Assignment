@@ -42,7 +42,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	@Override
 	protected double getFitness(int chromosomeIndex) {
 		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
-		MySolution mySolution = new MySolution(instance, chromosome);
+		MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
 		
 		return mySolution.getCost().getTotalCost();
 	}
