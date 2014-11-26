@@ -257,13 +257,15 @@ public class MySolution extends SolutionAdapter{
 		int vehicleIndex = 0;
 		int routeIndex = 0;
 		for(int i=0; i<GAResultInt.length; i++){
-			//Curren customer is the depot
+			//Current customer is the depot
 			if(GAResultInt[i] == 0){ 
+				evaluateRoute(routes[0][vehicleIndex]);
 				vehicleIndex++;
 				routeIndex = 0;
 			}
 			
-			routes[0][vehicleIndex].addCustomer();
+			customerChosenPtr = instance.getDepot(0).getAssignedCustomer(GAResultInt[i]);
+			routes[0][vehicleIndex].addCustomer(customerChosenPtr, routeIndex);
 			routeIndex++;
 		}
 		
