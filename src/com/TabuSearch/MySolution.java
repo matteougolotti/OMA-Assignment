@@ -218,7 +218,7 @@ public class MySolution extends SolutionAdapter{
 	 * @param instance
 	 * @param geneticAlgorithmSolution
 	 */
-	private void buildInitialRoutesFromGA(Instance instance, int geneticAlgorithmSolution[]){
+	private void buildInitialRoutesFromGA(Instance instance, String geneticAlgorithmSolution[]){
 		Route route; // stores the pointer to the current route
 		Customer customerChosenPtr; // stores the pointer to the customer chosen from depots list assigned customers
 		int assignedCustomersNr;
