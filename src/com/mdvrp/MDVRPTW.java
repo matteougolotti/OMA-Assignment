@@ -38,6 +38,10 @@ public class MDVRPTW {
 			instance = new Instance(parameters); 
 			instance.populateFromHombergFile(parameters.getInputFileName());
 						
+			//Genetic Algorithms here ==> GAResult
+			
+			//MySolution(istance, GAResult)
+			
 			// Init memory for Tabu Search
 			initialSol 		= new MySolution(instance);
 			objFunc 		= new MyObjectiveFunction(instance);

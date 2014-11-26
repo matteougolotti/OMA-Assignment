@@ -119,7 +119,6 @@ public class MySearchProgram implements TabuSearchListener{
 			}
 			counter=1;
 		}
-		
 		if(graphicsVisible) {
 			currentRoutes = cloneRoutes(sol.getRoutes());
 			panel.iterations++;

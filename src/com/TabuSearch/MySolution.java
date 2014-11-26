@@ -46,6 +46,22 @@ public class MySolution extends SolutionAdapter{
     	Bs = new int[instance.getCustomersNr()][instance.getVehiclesNr()][instance.getDepotsNr()];		
 	}
 	
+	public MySolution(Instance instance, String GAResult[]) {
+		MySolution.setInstance(instance);
+		cost = new Cost();
+		initializeRoutes(instance);
+		this.buildInitialRoutesFromGA(instance, GAResult);
+		// used for input routes from file
+		alpha 	= 1;
+    	beta 	= 1;
+    	gamma	= 1;
+    	delta	= 0.005;
+    	upLimit = 10000000;
+    	resetValue = 0.1;
+    	feasibleIndex = 0;
+    	MySolution.setIterationsDone(0);
+    	Bs = new int[instance.getCustomersNr()][instance.getVehiclesNr()][instance.getDepotsNr()];		
+	}
 	
 	public Object clone()
     {   
@@ -218,48 +234,39 @@ public class MySolution extends SolutionAdapter{
 	 * @param instance
 	 * @param geneticAlgorithmSolution
 	 */
-	private void buildInitialRoutesFromGA(Instance instance, int geneticAlgorithmSolution[]){
+	private void buildInitialRoutesFromGA(Instance instance, String GAResult[]){
 		Route route; // stores the pointer to the current route
 		Customer customerChosenPtr; // stores the pointer to the customer chosen from depots list assigned customers
 		int assignedCustomersNr;
 		int startCustomer;
 		int customerChosen; // serve to cycle j, j+1, ... assignedcustomersnr, 0, ... j-1
-
+		int [] GAResultInt = new int [GAResult.length];
+		
+		for(int i=0; i<GAResult.length; i++){
+			GAResultInt[i] = Integer.valueOf(GAResult[i]);
+		}
+		
 		assignedCustomersNr = instance.getDepot(0).getAssignedCustomersNr();
 		if(instance.getParameters().getStartClient() != -1) {
 			startCustomer = instance.getParameters().getStartClient();
 		}else{
-			startCustomer = instance.getRandom().nextInt(assignedCustomersNr);
+			startCustomer = GAResultInt[0];
 			instance.getParameters().setStartClient(startCustomer);
 		}
-		// cycle the entire list of customers starting from the randomly chosen one
-		for (int customerIndex = startCustomer; customerIndex < assignedCustomersNr + startCustomer; ++customerIndex) {
-			// serve to cycle j, j+1, ... assignedcustomersnr, 0, ... j-1
-			customerChosen = customerIndex % assignedCustomersNr;
-
-			// stores the pointer to the customer chosen from depots list assigned customers
-			customerChosenPtr = instance.getDepot(0).getAssignedCustomer(customerChosen);
-			// cycle the routes until the last one
-			int vehicleIndex;
-			for(vehicleIndex = 0; vehicleIndex < instance.getVehiclesNr() - 1; ++vehicleIndex){
-				// stores the pointer to the current route
-				route = routes[0][vehicleIndex];
-
-				// accept on the route only if satisfy the load and duration
-				if (customerChosenPtr.getCapacity() + route.getCost().load <= route.getLoadAdmited()
-				 && customerChosenPtr.getServiceDuration() + route.getDuration()  <= route.getDurationAdmited()){
-					insertBestTravel(instance, route, customerChosenPtr);
-					evaluateRoute(route);
-					break;
-				}
-			} // end for routes
-				// if the customer was not inserted and we reach the last route
-				// insert it anyway
-			if(vehicleIndex == instance.getVehiclesNr() - 1){
-				insertBestTravel(instance, routes[0][vehicleIndex], customerChosenPtr);
-				evaluateRoute(routes[0][vehicleIndex]);
+		
+		int vehicleIndex = 0;
+		int routeIndex = 0;
+		for(int i=0; i<GAResultInt.length; i++){
+			//Curren customer is the depot
+			if(GAResultInt[i] == 0){ 
+				vehicleIndex++;
+				routeIndex = 0;
 			}
-		} // end for customer list
+			
+			routes[0][vehicleIndex].addCustomer();
+			routeIndex++;
+		}
+		
 	
 	}
 	
