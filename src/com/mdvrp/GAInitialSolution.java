@@ -1,11 +1,13 @@
 package com.mdvrp;
 
+import com.TabuSearch.MySolution;
 import com.softtechdesign.ga.Crossover;
 import com.softtechdesign.ga.GAException;
 import com.softtechdesign.ga.GAStringsSeq;
 
 public class GAInitialSolution extends GAStringsSeq {
-
+	private static Instance instance;
+	
 	/**
      * Initialize the GAStringSeq
      * @param chromosomeDim
@@ -22,7 +24,7 @@ public class GAInitialSolution extends GAStringsSeq {
      * @param computeStatistics
      * @throws GAException
      */
-	public GAInitialSolution(String genes[]) throws GAException {
+	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  20, //size of chromosome (number of customers + number of vehicles)
                 300, //population has N chromosomes (eventualmente parametrizzabile)
                 0.7, //crossover probability
@@ -35,13 +37,14 @@ public class GAInitialSolution extends GAStringsSeq {
                 genes, //gene space (possible gene values)
                 Crossover.ctTwoPoint, //crossover type
                 true); //compute statisitics?
-		
 	}
 
 	@Override
-	protected double getFitness(int arg0) {
-		// TODO Auto-generated method stub
-		return 0;
+	protected double getFitness(int chromosomeIndex) {
+		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
+		MySolution mySolution = new MySolution(instance, chromosome);
+		
+		return mySolution.getCost().getTotalCost();
 	}
 
 }

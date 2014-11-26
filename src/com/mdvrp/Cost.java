@@ -74,6 +74,10 @@ public class Cost {
 		total = travelTime + alpha * loadViol + beta * durationViol + gamma * twViol;
 	}
 	
+	public double getTotalCost(){
+		return total;
+	}
+	
 	public void setLoadViol(double capacityviol) {
 		this.loadViol = capacityviol;
 	}

@@ -32,7 +32,7 @@ public class MySearchProgram implements TabuSearchListener{
 		int counter;
 		private static int tenureMax;//10-20/100-400 ; 1-9/1-100 ; 20-30/400-900 
 		private static int tenureMin;
-		private static final int countTenure = 20;
+		private static final int countTenure = 20;//ogni quanti fallimenti vario la tenure
 		private static final int range = 10;
 	
 	public MySearchProgram(Instance instance, Solution initialSol, MoveManager moveManager, ObjectiveFunction objFunc, TabuList tabuList, boolean minmax, PrintStream outPrintStream)
@@ -43,12 +43,14 @@ public class MySearchProgram implements TabuSearchListener{
 		this.instance = instance;
 		
 		//set tenure range
-		tenureMax = (int) Math.sqrt(instance.getCustomersNr());	
+		tenureMax = (int) Math.sqrt(instance.getCustomersNr())+1;	
 		
 		if(tenureMax<=range)
 			tenureMin = 1;
 		else
 			tenureMin = tenureMax - range;
+		
+		System.out.println("Tabu tenure set. Max: "+tenureMax+" Min: "+tenureMin);
 		
 		this.graphicsVisible = instance.getParameters().isGraphics();
 		MySearchProgram.setIterationsDone(0);
@@ -117,7 +119,6 @@ public class MySearchProgram implements TabuSearchListener{
 			}
 			counter=1;
 		}
-		
 		if(graphicsVisible) {
 			currentRoutes = cloneRoutes(sol.getRoutes());
 			panel.iterations++;

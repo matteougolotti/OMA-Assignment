@@ -1,4 +1,4 @@
-﻿package com.mdvrp;
+package com.mdvrp;
 
 import java.io.FileWriter;
 import java.io.PrintStream;
@@ -10,8 +10,9 @@ import com.TabuSearch.MyObjectiveFunction;
 import com.TabuSearch.MySearchProgram;
 import com.TabuSearch.MySolution;
 import com.TabuSearch.MyTabuList;
+import com.softtechdesign.ga.ChromStrings;
 
-public class MDVRPTW {
+public class MDVRPTWGA {
 		
 	public static void main(String[] args) {
 		MySearchProgram     search;
@@ -39,11 +40,17 @@ public class MDVRPTW {
 			instance.populateFromHombergFile(parameters.getInputFileName());
 						
 			//Genetic Algorithms here ==> GAResult
+			String[] genes = new String[instance.getCustomersNr()];
+			for(int i=0; i<instance.getCustomersNr(); i++){
+				genes[i] = String.valueOf(i);
+			}
 			
-			//MySolution(istance, GAResult)
+			GAInitialSolution GA = new GAInitialSolution(genes, instance);
+			ChromStrings sol = (ChromStrings) GA.getFittestChromosome();
+			String[] GASolution = (sol.getGenes());
 			
 			// Init memory for Tabu Search
-			initialSol 		= new MySolution(instance);
+			initialSol 		= new MySolution(instance, GASolution);
 			objFunc 		= new MyObjectiveFunction(instance);
 	        moveManager 	= new MyMoveManager(instance);
 	        moveManager.setMovesType(parameters.getMovesType());
