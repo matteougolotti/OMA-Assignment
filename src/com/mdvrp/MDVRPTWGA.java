@@ -41,8 +41,8 @@ public class MDVRPTWGA {
 			instance.populateFromHombergFile(parameters.getInputFileName());
 						
 			//Genetic Algorithms here ==> GAResult
-			String[] genes = new String[instance.getCustomersNr()];
-			for(int i=0; i<instance.getCustomersNr(); i++){
+			String[] genes = new String[instance.getCustomersNr()+instance.getVehiclesNr()];//in questo modo assegnamo un codice anche ai veicoli
+			for(int i=1; i<genes.length; i++){
 				genes[i] = String.valueOf(i);
 			}
 			

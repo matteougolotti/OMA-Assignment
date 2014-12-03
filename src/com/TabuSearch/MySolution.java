@@ -243,31 +243,40 @@ public class MySolution extends SolutionAdapter{
 		int customerChosen; // serve to cycle j, j+1, ... assignedcustomersnr, 0, ... j-1
 		int [] GAResultInt = new int [GAResult.length];
 		
+		int trovato = 0;
 		for(int i=0; i<GAResult.length; i++){
 			GAResultInt[i] = Integer.valueOf(GAResult[i]);
+			if(GAResultInt[i]>instance.getCustomersNr())
+			{
+				GAResultInt[i]=0;
+				trovato++;
+			}
+			
 		}
-		
-		assignedCustomersNr = instance.getDepot(0).getAssignedCustomersNr();
+		int start_index = 0;
+		assignedCustomersNr = instance.getCustomersNr();//instance.getDepot(0).getAssignedCustomersNr(); nel nostro caso
 		if(instance.getParameters().getStartClient() != -1) {
 			startCustomer = instance.getParameters().getStartClient();
 		}else{
-			startCustomer = GAResultInt[0];
+			startCustomer = GAResultInt[start_index];
 			instance.getParameters().setStartClient(startCustomer);
 		}
 		
 		int vehicleIndex = 0;
 		int routeIndex = 0;
-		for(int i=0; i<GAResultInt.length; i++){
+		for(int i=start_index; i<GAResultInt.length; i++){
 			//Current customer is the depot
 			if(GAResultInt[i] == 0){ 
 				evaluateRoute(routes[0][vehicleIndex]);
 				vehicleIndex++;
 				routeIndex = 0;
 			}
-			
-			customerChosenPtr = instance.getDepot(0).getAssignedCustomer(GAResultInt[i]);
-			routes[0][vehicleIndex].addCustomer(customerChosenPtr, routeIndex);
-			routeIndex++;
+			else
+			{
+				customerChosenPtr = instance.getDepot(0).getAssignedCustomer(GAResultInt[i]-1);
+				routes[0][vehicleIndex].addCustomer(customerChosenPtr, routeIndex);
+				routeIndex++;
+			}
 		}
 		
 	
