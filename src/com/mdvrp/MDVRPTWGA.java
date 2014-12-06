@@ -41,12 +41,13 @@ public class MDVRPTWGA {
 			instance.populateFromHombergFile(parameters.getInputFileName());
 						
 			//Genetic Algorithms here ==> GAResult
-			String[] genes = new String[instance.getCustomersNr()+instance.getVehiclesNr()];//in questo modo assegnamo un codice anche ai veicoli
-			for(int i=1; i<genes.length; i++){
-				genes[i] = String.valueOf(i);
+			String[] genes = new String[instance.getCustomersNr()+instance.getVehiclesNr()-1];//in questo modo assegnamo un codice anche ai veicoli
+			for(int i=0; i<genes.length; i++){
+				genes[i] = String.valueOf(i+1);
 			}
 			
 			GAInitialSolution GA = new GAInitialSolution(genes, instance);
+			GA.evolve();
 			ChromStrings sol = (ChromStrings) GA.getFittestChromosome();
 			String[] GASolution = (sol.getGenes());
 			
