@@ -31,7 +31,7 @@ public class GAInitialSolution extends GAStringsSeq {
      */
 	private int countCross = 0;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
-		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
+		super(  instance.getCustomersNr()+instance.getVehiclesNr()-2, //size of chromosome (number of customers + number of vehicles)
 				300, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
@@ -102,6 +102,10 @@ public class GAInitialSolution extends GAStringsSeq {
 		ChromStrings par1 = (ChromStrings)Chrom1;
 		ChromStrings par2 = (ChromStrings)Chrom2;
 		
+		System.out.println("Do crossover "+this.countCross);
+		System.out.println(par1.toString());
+		System.out.println(par2.toString() + "\n");
+		
 		int i,j;
 		int t = myGetRandom(chromosomeDim-2);
 		
@@ -122,6 +126,7 @@ public class GAInitialSolution extends GAStringsSeq {
 					j++;
 			}
 			off1.setGene(par1.getGene(j), i);
+			System.out.println(off1.toString());
 			if(j>=chromosomeDim-1)
 				j=0;
 			else
@@ -138,6 +143,7 @@ public class GAInitialSolution extends GAStringsSeq {
 					j++;
 			}
 			off2.setGene(par2.getGene(j), i);
+			System.out.println(off2.toString());
 			if(j>=chromosomeDim-1)
 				j=0;
 			else
@@ -157,9 +163,15 @@ public class GAInitialSolution extends GAStringsSeq {
                 // CREATE OFFSPRING TWO
         ((ChromStrings)Chrom2).setGene(gene1, iCrossoverPoint);
         */
-		countCross++;
-		System.out.println("Do crossover "+this.countCross);
+		synchronized(this){
+			countCross++;
+		}
+		//System.out.println("Do crossover "+this.countCross);
+		//System.out.println(off1.toString());
+		//System.out.println(off2.toString() + "\n");
 	}
+	
+	
 	private boolean ChromosomeContainsGene(ChromStrings c, int last, String gene)
 	{ 
 		boolean trovato = false;
