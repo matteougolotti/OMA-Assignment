@@ -29,6 +29,7 @@ public class GAInitialSolution extends GAStringsSeq {
      * @param computeStatistics
      * @throws GAException
      */
+	private int countCross = 0;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
 				300, //population has N chromosomes (eventualmente parametrizzabile)
@@ -156,6 +157,8 @@ public class GAInitialSolution extends GAStringsSeq {
                 // CREATE OFFSPRING TWO
         ((ChromStrings)Chrom2).setGene(gene1, iCrossoverPoint);
         */
+		countCross++;
+		System.out.println("Do crossover "+this.countCross);
 	}
 	private boolean ChromosomeContainsGene(ChromStrings c, int last, String gene)
 	{ 
