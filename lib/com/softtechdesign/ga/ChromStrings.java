@@ -105,4 +105,14 @@ public class ChromStrings extends Chromosome
             this.genes[iGene] = chromStrings.genes[iGene];
     }
 
+    /** absolute (not relative) fitness value */
+    //protected double fitness; 
+    public double getFitness() {
+		return fitness;
+	}
+
+	public void setFitness(double fitness) {
+		this.fitness = fitness;
+	}
+	
 }

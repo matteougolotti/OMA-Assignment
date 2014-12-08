@@ -105,4 +105,17 @@ public class ChromFloat extends Chromosome
             sGenes += this.genes[i] + ",";
         return (sGenes);
     }
+
+	@Override
+	double getFitness() {
+		// TODO Auto-generated method stub
+		return fitness;
+	}
+
+	@Override
+	void setFitness(double fitness) {
+		// TODO Auto-generated method stub
+		this.fitness=fitness;
+		
+	}
 }

@@ -13,7 +13,9 @@ public abstract class Chromosome
 {
     /** absolute (not relative) fitness value */
     protected double fitness; 
-    /** 0 = worst fit, PopDim = best fit */
+    abstract double getFitness();
+	abstract void setFitness(double fitness);
+	/** 0 = worst fit, PopDim = best fit */
     protected int fitnessRank; 
     /** Get the genes as a string */
     abstract String getGenesAsStr();

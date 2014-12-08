@@ -47,6 +47,7 @@ public class MDVRPTWGA {
 			}
 			
 			GAInitialSolution GA = new GAInitialSolution(genes, instance);
+			GA.InitialFittness();//calcola costi routes
 			GA.evolve();
 			ChromStrings sol = (ChromStrings) GA.getFittestChromosome();
 			String[] GASolution = (sol.getGenes());

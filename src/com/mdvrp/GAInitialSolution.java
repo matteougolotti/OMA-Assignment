@@ -1,8 +1,10 @@
 package com.mdvrp;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.coinor.opents.Solution;
 
@@ -32,13 +34,14 @@ public class GAInitialSolution extends GAStringsSeq {
      * @throws GAException
      */
 	private int countCross = 0;
+	//private Instance instance;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
-				300, //population has N chromosomes (eventualmente parametrizzabile)
+				40, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
-                0.7, //crossover probability
-                10, //random selection chance % (regardless of fitness)
-                600, //max generations
+                1, //crossover probability
+                0, //random selection chance % (regardless of fitness)
+                20, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
                 0.00, //chromosome mutation prob.
@@ -46,6 +49,7 @@ public class GAInitialSolution extends GAStringsSeq {
                 genes, //gene space (possible gene values)
                 Crossover.ctOnePoint,//ctTwoPoint, //crossover type
                 true); //compute statisitics?
+				//this.instance = new Instance(instance.getParameters());
 	}
 
 	
@@ -54,33 +58,29 @@ public class GAInitialSolution extends GAStringsSeq {
      * 
      * TODO we must rewrite it, so that there are no gene repetitions in the initial population
      */
+	//metodo che se incrementa l'indice se non lo trova anzichè riprovare con un nuovo casuale
     protected void initPopulation()
     {
         for (int i=0; i < populationDim; i++)
         {
-        	Map used_chromosomes = new HashMap();//mappa per memorizzare i cromosomi usati
+        	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
         	for (int j=0; j < chromosomeDim; j++){
-        		String gene = String.valueOf(myGetRandom(chromosomeDim));//get a random gene
+        		int gene = myGetRandom(chromosomeDim);//get a random gene
         		
-        		while(used_chromosomes.containsKey(gene)){// check while is not find a unused gene
-        			int g = Integer.parseInt(gene);//converto in int
-        			
-        			if(g>= chromosomeDim)//controllo che non sia il gene più grande(nCustomer+nVeichles)
-        				g=1;//riparto da 1
+        		while(used.contains(gene)){// check while is not find a unused gene
+        			if(gene>=chromosomeDim)
+        				gene=1;
         			else
-        				g++;//incremento
-        			
-        		gene = String.valueOf(g);//riconverto in stringa	
+        				gene++;
         		}
-        		used_chromosomes.put(gene, 1);//metto il gene usato nella mappa
+        		used.add(gene);//metto il gene usato nella mappa
         			
-                this.getChromosome(i).setGene(gene,j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
+                this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
         	}
         	/*
         	* DA RENDER PROTECTED ALTRIMENTI NON LO VEDIAMO!!!
         	*/
-          // this.chromosomes[i].fitness = getFitness(i);
-        	//System.out.println(this.getChromosome(i).getGenes().length);
+        	//calcolo fitness nel metodo InitiaFitness
         }
     }
 	
@@ -184,10 +184,10 @@ public class GAInitialSolution extends GAStringsSeq {
 		{
 			Chrom1 = off1;
 			Chrom2 = off2;
-			//System.out.println("cross over ok");
+			System.out.println((++countCross)+" cross over ok");;
 		}
 		else
-			System.out.println("cross over ko!");
+			System.out.println((++countCross)+" cross over ko!");
 			
 		
 		/*
@@ -212,7 +212,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	
 	private boolean check_repetitions(ChromStrings off1) {
 		
-		Map chromosomes = new HashMap();//mappa per memorizzare i cromosomi usati
+		Map<String, Integer> chromosomes = new HashMap<String, Integer>();//mappa per memorizzare i cromosomi usati
 		for(int i = 1; i<=chromosomeDim;i++)
 		{
 			chromosomes.put(String.valueOf(i), 0);
@@ -261,11 +261,10 @@ public class GAInitialSolution extends GAStringsSeq {
 	protected double getFitness(int chromosomeIndex) {
 		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
 		MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
-		//evaluateAbsolutely(mySolution);
+		evaluateAbsolutely(mySolution);
 		
 		return mySolution.getCost().getTotalCost();
 	}
-	
 	
 	/**
 	 * Ho usato il codice qua sotto per calcolare la fitness, e sembra funzionare piu o meno
@@ -361,5 +360,17 @@ public class GAInitialSolution extends GAStringsSeq {
 		} // end if route not empty
 		
     } // end method evaluate route
+
+
+	public void InitialFittness() {
+		// TODO Auto-generated method stub
+		for(int i = 0; i< populationDim;i++)
+		{
+				MySolution mySolution = new MySolution(MDVRPTWGA.instance, this.getChromosome(i).getGenes());
+				this.evaluateAbsolutely(mySolution);
+				this.getChromosome(i).setFitness(mySolution.getCost().getTotalCost());
+		}
+		
+	}
 	
 }

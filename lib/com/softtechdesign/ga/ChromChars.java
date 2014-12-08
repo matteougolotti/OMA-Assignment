@@ -94,4 +94,17 @@ public class ChromChars extends Chromosome
         for (iGene = 0; iGene < genes.length; iGene++)
             this.genes[iGene] = ChromChars.genes[iGene];
     }
+
+	@Override
+	double getFitness() {
+		// TODO Auto-generated method stub
+		return this.fitness;
+	}
+
+	@Override
+	void setFitness(double fitness) {
+		// TODO Auto-generated method stub
+		this.fitness=fitness;
+		
+	}
 }
