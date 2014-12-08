@@ -33,7 +33,7 @@ public class GAInitialSolution extends GAStringsSeq {
      */
 	private int countCross = 0;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
-		super(  instance.getCustomersNr()+instance.getVehiclesNr()-2, //size of chromosome (number of customers + number of vehicles)
+		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
 				300, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
@@ -44,7 +44,7 @@ public class GAInitialSolution extends GAStringsSeq {
                 0.06, //chromosome mutation prob.
                 0, //number of decimal places in chrom
                 genes, //gene space (possible gene values)
-                Crossover.ctTwoPoint, //crossover type
+                Crossover.ctOnePoint,//ctTwoPoint, //crossover type
                 true); //compute statisitics?
 	}
 
@@ -101,12 +101,14 @@ public class GAInitialSolution extends GAStringsSeq {
 		ChromStrings chr1 = (ChromStrings)Chrom1;
 		ChromStrings chr2 = (ChromStrings)Chrom2;
 		
+		/*ipotesi farlo per più volte*/
+		
 		int t1 = myGetRandom(chromosomeDim-2);
 		
 		String s = chr1.getGene(t1);
 		int t2 = 0;
 		for(int i = 0; i<chromosomeDim; i++){
-			if(chr2.getGene(t2).equals(s)){
+			if(chr2.getGene(i).equals(s)){/*t2->i*/
 				t2 = i;
 				break;
 			}
@@ -130,9 +132,9 @@ public class GAInitialSolution extends GAStringsSeq {
 		ChromStrings par1 = (ChromStrings)Chrom1;
 		ChromStrings par2 = (ChromStrings)Chrom2;
 		
-		System.out.println("Do crossover "+this.countCross);
-		System.out.println(par1.toString());
-		System.out.println(par2.toString() + "\n");
+		//System.out.println("Do crossover "+this.countCross);
+		//System.out.println(par1.toString());
+		//System.out.println(par2.toString() + "\n");
 		
 		int i,j;
 		int t = myGetRandom(chromosomeDim-2);
@@ -154,7 +156,7 @@ public class GAInitialSolution extends GAStringsSeq {
 					j++;
 			}
 			off1.setGene(par1.getGene(j), i);
-			System.out.println(off1.toString());
+			//System.out.println(off1.toString());
 			if(j>=chromosomeDim-1)
 				j=0;
 			else
@@ -171,15 +173,23 @@ public class GAInitialSolution extends GAStringsSeq {
 					j++;
 			}
 			off2.setGene(par2.getGene(j), i);
-			System.out.println(off2.toString());
+			//System.out.println(off2.toString());
 			if(j>=chromosomeDim-1)
 				j=0;
 			else
 				j++;
 		}
 		
-		Chrom1 = off1;
-		Chrom2 = off2;
+		if(check_repetitions(off1)&&check_repetitions(off2))//controllo che il crossover abbia funzionato
+		{
+			Chrom1 = off1;
+			Chrom2 = off2;
+			//System.out.println("cross over ok");
+		}
+		else
+			System.out.println("cross over ko!");
+			
+		
 		/*
 		int iCrossoverPoint = myGetRandom(chromosomeDim-2);
         String gene1 = ((ChromStrings)Chrom1).getGene(iCrossoverPoint);
@@ -200,6 +210,39 @@ public class GAInitialSolution extends GAStringsSeq {
 	}
 	
 	
+	private boolean check_repetitions(ChromStrings off1) {
+		
+		Map chromosomes = new HashMap();//mappa per memorizzare i cromosomi usati
+		for(int i = 1; i<=chromosomeDim;i++)
+		{
+			chromosomes.put(String.valueOf(i), 0);
+		}
+		for(int i = 0;i<off1.getGenes().length;i++)
+		{
+			Object v =chromosomes.get(off1.getGene(i));
+			
+			if( v !=null)
+			{
+				if((int)v == 1)
+					return false;//gene già utilizzato
+				else
+				{
+					chromosomes.remove(off1.getGene(i));
+					chromosomes.put(off1.getGene(i),1);
+				}
+				
+			}
+			else
+				return false;//gene non presente
+			
+				
+					
+		}
+		
+		return true;
+	}
+
+
 	private boolean ChromosomeContainsGene(ChromStrings c, int last, String gene)
 	{ 
 		boolean trovato = false;
@@ -231,7 +274,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	 *  e i coomenti da getFitness qui sopra
 	 */
 	
-	/*private void evaluateAbsolutely(Solution solution){
+	private void evaluateAbsolutely(Solution solution){
     	MySolution sol = (MySolution)solution;
     	Route route;
     	
@@ -318,5 +361,5 @@ public class GAInitialSolution extends GAStringsSeq {
 		} // end if route not empty
 		
     } // end method evaluate route
-	*/
+	
 }

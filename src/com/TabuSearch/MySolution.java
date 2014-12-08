@@ -243,10 +243,21 @@ public class MySolution extends SolutionAdapter{
 		int customerChosen; // serve to cycle j, j+1, ... assignedcustomersnr, 0, ... j-1
 		int [] GAResultInt = new int [GAResult.length];
 		
-		int trovato = 0;
+		int[] trovato = new int[100];
+		int count =0;
+		
 		for(int i=0; i<GAResult.length; i++){
 			GAResultInt[i] = Integer.valueOf(GAResult[i]);
-			if(GAResultInt[i]>instance.getCustomersNr()){trovato++;}
+			if(GAResultInt[i]>instance.getCustomersNr()){
+				trovato[count]=GAResultInt[i];count++;
+				if(count>instance.getVehiclesNr()-1)
+				{   
+					System.out.println("troppi veicoli");
+					for(int j = 0; j< count; j++)
+						System.out.println(j+" -> "+trovato[j]);
+					
+				}
+			}
 			/*if(GAResultInt[i]>instance.getCustomersNr())
 			{
 				GAResultInt[i]=0;
