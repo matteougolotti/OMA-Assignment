@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.coinor.opents.Solution;
+
 import com.TabuSearch.MySolution;
 import com.softtechdesign.ga.ChromStrings;
 import com.softtechdesign.ga.Chromosome;
@@ -36,13 +38,13 @@ public class GAInitialSolution extends GAStringsSeq {
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
                 10, //random selection chance % (regardless of fitness)
-                20, //max generations
+                600, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
                 0.06, //chromosome mutation prob.
                 0, //number of decimal places in chrom
                 genes, //gene space (possible gene values)
-                Crossover.ctOnePoint, //crossover type
+                Crossover.ctTwoPoint, //crossover type
                 true); //compute statisitics?
 	}
 
@@ -78,7 +80,7 @@ public class GAInitialSolution extends GAStringsSeq {
         	* DA RENDER PROTECTED ALTRIMENTI NON LO VEDIAMO!!!
         	*/
           //this.chromosomes[i].fitness = getFitness(i);
-        	System.out.println(this.getChromosome(i).getGenes().length);
+        	//System.out.println(this.getChromosome(i).getGenes().length);
         }
     }
 	
@@ -86,11 +88,37 @@ public class GAInitialSolution extends GAStringsSeq {
 		// TODO Auto-generated method stub
 		return (System.currentTimeMillis()%2 == 0)?true:false;
 	}
+	
 	private int myGetRandom(int range)
 	{
 		Random generator = new Random(System.currentTimeMillis());
 		int a = generator.nextInt(range-1)+1 ;
 		return a;
+	}
+	
+	@Override
+	protected void doTwoPtCrossover(Chromosome Chrom1, Chromosome Chrom2){
+		ChromStrings chr1 = (ChromStrings)Chrom1;
+		ChromStrings chr2 = (ChromStrings)Chrom2;
+		
+		int t1 = myGetRandom(chromosomeDim-2);
+		
+		String s = chr1.getGene(t1);
+		int t2 = 0;
+		for(int i = 0; i<chromosomeDim; i++){
+			if(chr2.getGene(t2).equals(s)){
+				t2 = i;
+				break;
+			}
+		}
+		
+		s = chr1.getGene(t1);
+		chr1.setGene(chr1.getGene(t2), t1);
+		chr1.setGene(s, t2);
+		
+		s = chr2.getGene(t1);
+		chr2.setGene(chr2.getGene(t2), t1);
+		chr2.setGene(s, t2);
 	}
 	
 	@Override
@@ -185,19 +213,110 @@ public class GAInitialSolution extends GAStringsSeq {
 		}
 		return trovato;
 	}
-	/**
-	 * TODO this method must compute the optimal routes, give the chosen customers order. 
-	 * 
-	 * @param chromosome
-	 * @return
-	 */
+	
 	@Override
 	protected double getFitness(int chromosomeIndex) {
 		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
-		//String[] solution = computeBestRoutes(chromosome);
-		MySolution mySolution = new MySolution(MDVRPTWGA.instance);
+		MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
+		//evaluateAbsolutely(mySolution);
 		
 		return mySolution.getCost().getTotalCost();
 	}
+	
+	
+	/**
+	 * Ho usato il codice qua sotto per calcolare la fitness, e sembra funzionare piu o meno
+	 * anche se ritorna un valore di fitness enorme.
+	 * Se volete provarlo vi basta togliere i commenti all'inizio e alla fine,
+	 *  e i coomenti da getFitness qui sopra
+	 */
+	
+	/*private void evaluateAbsolutely(Solution solution){
+    	MySolution sol = (MySolution)solution;
+    	Route route;
+    	
+    	sol.getCost().initialize();
+		for (int i = 0; i < sol.getDepotsNr(); ++i) {
+			for(int j = 0; j < sol.getDepotVehiclesNr(i); ++j){
+				route = sol.getRoute(i, j);
+		    	// do the math only if the route is not empty
+				if(!route.isEmpty()) {
+					evaluateRoute(route);
+					sol.getCost().travelTime += route.getCost().getTravel();
+					sol.getCost().load += route.getCost().load;
+					sol.getCost().serviceTime += route.getCost().serviceTime;
+					sol.getCost().waitingTime += route.getCost().waitingTime;
+					sol.getCost().addLoadViol(route.getCost().getLoadViol());
+					sol.getCost().addDurationViol(route.getCost().getDurationViol());
+					sol.getCost().addTWViol(route.getCost().getTwViol());
+					
+				} // end if route not empty
+			}// end for vehicles
+		}// end for depots
+		sol.getCost().calculateTotalCostViol();
+	}// end method evaluateAbsolutely
 
+	private void evaluateRoute(Route route) {
+    	double totalTime = 0;
+    	double waitingTime = 0;
+    	double twViol = 0;
+    	Customer customerK;
+    	route.initializeTimes();
+    	// do the math only if the route is not empty
+		if(!route.isEmpty()){
+	    	// sum distances between each node in the route
+			for (int k = 0; k < route.getCustomersLength(); ++k){
+				// get the actual customer
+				customerK = route.getCustomer(k);
+				// add travel time to the route
+				if(k == 0){
+					route.getCost().travelTime += MDVRPTWGA.instance.getTravelTime(route.getDepotNr(), customerK.getNumber());
+					totalTime += MDVRPTWGA.instance.getTravelTime(route.getDepotNr(), customerK.getNumber());
+				}else{
+					route.getCost().travelTime += MDVRPTWGA.instance.getTravelTime(route.getCustomerNr(k -1), customerK.getNumber());
+					totalTime += MDVRPTWGA.instance.getTravelTime(route.getCustomerNr(k -1), customerK.getNumber());
+				} // end if else
+				
+				customerK.setArriveTime(totalTime);
+				// add waiting time if any
+				waitingTime = Math.max(0, customerK.getStartTw() - totalTime);
+				route.getCost().waitingTime += waitingTime;
+				// update customer timings information
+				customerK.setWaitingTime(waitingTime);
+				
+				totalTime = Math.max(customerK.getStartTw(), totalTime);
+
+				// add time window violation if any
+				twViol = Math.max(0, totalTime - customerK.getEndTw());
+				route.getCost().addTWViol(twViol);
+				customerK.setTwViol(twViol);
+				// add the service time to the total
+				totalTime += customerK.getServiceDuration();
+				// add service time to the route
+				route.getCost().serviceTime += customerK.getServiceDuration();
+				// add capacity to the route
+				route.getCost().load += customerK.getCapacity();
+				
+			} // end for customers
+			
+			// add the distance to return to depot: from last node to depot
+			totalTime += MDVRPTWGA.instance.getTravelTime(route.getLastCustomerNr(), route.getDepotNr());
+			route.getCost().travelTime += MDVRPTWGA.instance.getTravelTime(route.getLastCustomerNr(), route.getDepotNr());
+			// add the depot time window violation if any
+			twViol = Math.max(0, totalTime - route.getDepot().getEndTw());
+			route.getCost().addTWViol(twViol);
+			// update route with timings of the depot
+			route.setDepotTwViol(twViol);
+			route.setReturnToDepotTime(totalTime);
+			route.getCost().setLoadViol(Math.max(0, route.getCost().load - route.getLoadAdmited()));
+			route.getCost().setDurationViol(Math.max(0, route.getDuration() - route.getDurationAdmited()));
+			
+			route.getCost().setTravelTime(route.getCost().travelTime);
+			// update total violation
+			route.getCost().calculateTotalCostViol();
+			
+		} // end if route not empty
+		
+    } // end method evaluate route
+	*/
 }
