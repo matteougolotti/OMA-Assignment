@@ -41,7 +41,7 @@ public class GAInitialSolution extends GAStringsSeq {
                 600, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
-                0.06, //chromosome mutation prob.
+                0.00, //chromosome mutation prob.
                 0, //number of decimal places in chrom
                 genes, //gene space (possible gene values)
                 Crossover.ctOnePoint,//ctTwoPoint, //crossover type
@@ -79,7 +79,7 @@ public class GAInitialSolution extends GAStringsSeq {
         	/*
         	* DA RENDER PROTECTED ALTRIMENTI NON LO VEDIAMO!!!
         	*/
-          //this.chromosomes[i].fitness = getFitness(i);
+          // this.chromosomes[i].fitness = getFitness(i);
         	//System.out.println(this.getChromosome(i).getGenes().length);
         }
     }
