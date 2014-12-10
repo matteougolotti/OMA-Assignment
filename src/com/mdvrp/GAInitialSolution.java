@@ -41,7 +41,7 @@ public class GAInitialSolution extends GAStringsSeq {
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
                 0, //random selection chance % (regardless of fitness)
-                10, //max generations
+                200, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
                 0.06, //chromosome mutation prob.
@@ -347,7 +347,8 @@ public class GAInitialSolution extends GAStringsSeq {
 		MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
 		evaluateAbsolutely(mySolution);
 		
-		return mySolution.getCost().getTotalCost();
+		return Double.MAX_VALUE - mySolution.getCost().getTotalCost();
+		//return Math.random();
 	}
 	
 	/**
