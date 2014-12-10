@@ -66,7 +66,7 @@ public class GAInitialSolution extends GAStringsSeq {
     	
     	//Initial_rand_chromosomes = Generate_Initial_rand_chromosomes(NInitial_rand_chromosomes);//genero alcuni geni iniziali casuali in modo che però siano diversi tra un chromosoma e l'altro
     	
-        for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
+    	for (i=0; i < populationDim; i++)//STAND BY for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
         	
@@ -98,10 +98,10 @@ public class GAInitialSolution extends GAStringsSeq {
         			
                 this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
         	}
-        	for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
+        	/*for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
             {
-        		
-            }
+        		//STAND BY
+            }*/
         }
     }
 	
@@ -233,8 +233,10 @@ public class GAInitialSolution extends GAStringsSeq {
 			else
 				j++;
 		}
-		
-		if(check_repetitions2(off1)&&check_repetitions2(off2))//controllo che il crossover abbia funzionato
+		Chrom1 = off1;
+		Chrom2 = off2;
+		/*controllo che il crossover abbia funzionato
+		if(check_repetitions2(off1)&&check_repetitions2(off2))
 		{
 			Chrom1 = off1;
 			Chrom2 = off2;
@@ -243,7 +245,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		else
 		{
 			//System.out.println((++countCross)+" cross over ko!");
-		}
+		}*/
 			
 			
 		

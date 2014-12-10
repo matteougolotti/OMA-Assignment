@@ -45,13 +45,7 @@ public class MDVRPTWGA {
 			for(int i=0; i<genes.length; i++){
 				genes[i] = String.valueOf(i+1);
 			}
-			
-			/*Build a cycle to test N times a file
-			int N = 10;
-			for(int i = 0; i<N;i++)
-			{
-				
-			}*/
+
 			GAInitialSolution GA = new GAInitialSolution(genes, instance);
 			GA.InitialFittness();//calcola costi routes
 			GA.evolve();
