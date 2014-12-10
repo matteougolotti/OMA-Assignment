@@ -37,11 +37,11 @@ public class GAInitialSolution extends GAStringsSeq {
 	//private Instance instance;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
-				300, //population has N chromosomes (eventualmente parametrizzabile)
+				500, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
                 0, //random selection chance % (regardless of fitness)
-                200, //max generations
+                60, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
                 0.06, //chromosome mutation prob.
@@ -66,7 +66,7 @@ public class GAInitialSolution extends GAStringsSeq {
     	
     	//Initial_rand_chromosomes = Generate_Initial_rand_chromosomes(NInitial_rand_chromosomes);//genero alcuni geni iniziali casuali in modo che però siano diversi tra un chromosoma e l'altro
     	
-        for (i=0; i < populationDim; i++)
+        for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
         	
@@ -98,10 +98,10 @@ public class GAInitialSolution extends GAStringsSeq {
         			
                 this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
         	}
-        	/*
-        	* DA RENDER PROTECTED ALTRIMENTI NON LO VEDIAMO!!!
-        	*/
-        	//calcolo fitness nel metodo InitiaFitness
+        	for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
+            {
+        		
+            }
         }
     }
 	
