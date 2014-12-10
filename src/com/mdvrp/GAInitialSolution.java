@@ -37,14 +37,14 @@ public class GAInitialSolution extends GAStringsSeq {
 	//private Instance instance;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
-				40, //population has N chromosomes (eventualmente parametrizzabile)
+				300, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
-                1, //crossover probability
+                0.7, //crossover probability
                 0, //random selection chance % (regardless of fitness)
-                20, //max generations
+                10, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
-                0.00, //chromosome mutation prob.
+                0.06, //chromosome mutation prob.
                 0, //number of decimal places in chrom
                 genes, //gene space (possible gene values)
                 Crossover.ctOnePoint,//ctTwoPoint, //crossover type
@@ -61,11 +61,22 @@ public class GAInitialSolution extends GAStringsSeq {
 	//metodo che se incrementa l'indice se non lo trova anzichè riprovare con un nuovo casuale
     protected void initPopulation()
     {
-        for (int i=0; i < populationDim; i++)
+    	int i,j,gene,NInitial_rand_chromosomes = chromosomeDim/2;//populationDim/chromosomeDim +1 ;
+    	int[][] Initial_rand_chromosomes = new int[populationDim][NInitial_rand_chromosomes];
+    	
+    	Initial_rand_chromosomes = Generate_Initial_rand_chromosomes(NInitial_rand_chromosomes);//genero alcuni geni iniziali casuali in modo che però siano diversi tra un chromosoma e l'altro
+    	
+        for (i=0; i < populationDim; i++)
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
-        	for (int j=0; j < chromosomeDim; j++){
-        		int gene = myGetRandom(chromosomeDim);//get a random gene
+        	
+        	for(j=0;j<NInitial_rand_chromosomes;j++){//ciclo per segnare quei geni che ho creato inizialmente
+        		gene = Initial_rand_chromosomes[i][j];
+        		used.add(gene);//metto il gene usato nella mappa
+        		this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
+        	}
+        	for (j=NInitial_rand_chromosomes; j < chromosomeDim; j++){//ciclo per assegnare i geni rimanenti
+        		gene = myGetRandom(chromosomeDim);//get a random gene
         		
         		while(used.contains(gene)){// check while is not find a unused gene
         			if(gene>=chromosomeDim)
@@ -84,18 +95,49 @@ public class GAInitialSolution extends GAStringsSeq {
         }
     }
 	
+	private int[][] Generate_Initial_rand_chromosomes(int Ninitial_rand_chromosomes) {
+		// TODO Auto-generated method stub
+		int i,j;
+		int[][] m = new int[populationDim][Ninitial_rand_chromosomes];
+		//Set<Integer[]> used = new HashSet<Integer[]>(); //mappa per memorizzare le coppie di cromosomi usati
+		
+		for(j = 0; j<populationDim;j++){
+			for(i = 0; i<Ninitial_rand_chromosomes;i++){
+				m[j][i]=j+i+1;
+				while(m[j][i]>chromosomeDim)
+					m[j][i]-=chromosomeDim;
+			}
+		}
+		return m;
+	}
+
+
 	private boolean Probability50() {
 		// TODO Auto-generated method stub
 		return (System.currentTimeMillis()%2 == 0)?true:false;
 	}
 	
-	private int myGetRandom(int range)
+	private int myGetRandom(int range)//tra 1 e range
 	{
-		Random generator = new Random(System.currentTimeMillis());
+		Random generator = new Random( (long) (Math.random()*System.currentTimeMillis()));
 		int a = generator.nextInt(range-1)+1 ;
 		return a;
 	}
-	
+	@Override
+	protected void doRandomMutation(int iChromIndex){//inverte casualmente due geni di un cromosoma
+		
+		int FirstGene = myGetRandom(chromosomeDim)-1;
+		
+		int SecondGene =  myGetRandom(chromosomeDim)-1;
+		
+		while(SecondGene == FirstGene)
+			SecondGene =  myGetRandom(chromosomeDim)-1;
+		
+		String temp = this.getChromosome(iChromIndex).getGene(FirstGene);
+		
+		this.getChromosome(iChromIndex).setGene(this.getChromosome(iChromIndex).getGene(SecondGene), FirstGene);
+		this.getChromosome(iChromIndex).setGene(temp, SecondGene);
+	}
 	@Override
 	protected void doTwoPtCrossover(Chromosome Chrom1, Chromosome Chrom2){
 		ChromStrings chr1 = (ChromStrings)Chrom1;
@@ -148,8 +190,9 @@ public class GAInitialSolution extends GAStringsSeq {
 		j=t;
 		for(i=t;i<chromosomeDim;i++)
 		{
-			while(ChromosomeContainsGene(off1,i,par1.getGene(j)))
+			while(ChromosomeContainsGene(off1,i,par1.getGene(j)))//si blocca in questo while
 			{
+				String G = par1.getGene(j);
 				if(j>=chromosomeDim-1)
 					j=0;
 				else
@@ -165,8 +208,9 @@ public class GAInitialSolution extends GAStringsSeq {
 		j=t;
 		for(i=t;i<chromosomeDim;i++)
 		{
-			while(ChromosomeContainsGene(off2,i,par2.getGene(j)))
+			while(ChromosomeContainsGene(off2,i,par2.getGene(j)))//si blocca qui dentro
 			{
+				String G = par1.getGene(j);
 				if(j>=chromosomeDim-1)
 					j=0;
 				else
@@ -180,14 +224,17 @@ public class GAInitialSolution extends GAStringsSeq {
 				j++;
 		}
 		
-		if(check_repetitions(off1)&&check_repetitions(off2))//controllo che il crossover abbia funzionato
+		if(check_repetitions2(off1)&&check_repetitions2(off2))//controllo che il crossover abbia funzionato
 		{
 			Chrom1 = off1;
 			Chrom2 = off2;
-			System.out.println((++countCross)+" cross over ok");;
+			//System.out.println((++countCross)+" cross over ok");;
 		}
 		else
-			System.out.println((++countCross)+" cross over ko!");
+		{
+			//System.out.println((++countCross)+" cross over ko!");
+		}
+			
 			
 		
 		/*
@@ -234,27 +281,54 @@ public class GAInitialSolution extends GAStringsSeq {
 			}
 			else
 				return false;//gene non presente
-			
-				
-					
 		}
 		
 		return true;
+	}
+	private boolean check_repetitions2(ChromStrings off1) {//per annulare la ripetizione e inserire il chromosoma mancante
+		boolean[] presente = new boolean[chromosomeDim];//vettore per vedere quale chromosoma non è stato ripetuto
+		int index_off = 0;
+		String gene_rip = null;
+		
+		for(int i = 0; i<chromosomeDim;i++)//inizializzo vettore per segnare se un gene è presente
+		{
+			presente[i]=false;
+		}
+		for(int i = 0;i<off1.getGenes().length;i++)//scorro l'offspring se è presente metto true altrimenti mi segno l'indice
+		{
+			String gene = off1.getGene(i);
+			
+			int index = Integer.valueOf(gene)-1;
+			
+			if(presente[index]){
+				gene_rip = gene;
+				index_off= i;
+			}	
+			else
+				presente[index]=true;
+		}
+		for(int i = 0; i<chromosomeDim;i++)//scorro di nuovo il vettore presente quando trovo un valore che non c'è lo metto nell'indice che ho memorizzato prima ovvero il gene duplicato
+		{
+			if(!presente[i])
+				off1.setGene(String.valueOf(i+1), index_off);
+				
+		}	
+		return (gene_rip==null)?true:false;
 	}
 
 
 	private boolean ChromosomeContainsGene(ChromStrings c, int last, String gene)
 	{ 
-		boolean trovato = false;
+		//boolean trovato = false;
 		
 		for(int i = 0;i<last; i++)
 		{
 			if(c.getGene(i).equals(gene))
 			{
-				trovato = true;
+				return true;
 			}
 		}
-		return trovato;
+		return false;
 	}
 	
 	@Override
