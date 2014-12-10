@@ -61,26 +61,36 @@ public class GAInitialSolution extends GAStringsSeq {
 	//metodo che se incrementa l'indice se non lo trova anzichè riprovare con un nuovo casuale
     protected void initPopulation()
     {
-    	int i,j,gene,NInitial_rand_chromosomes = chromosomeDim/2;//populationDim/chromosomeDim +1 ;
-    	int[][] Initial_rand_chromosomes = new int[populationDim][NInitial_rand_chromosomes];
+    	int i,j,gene,NInitial_rand_chromosomes = 0;//chromosomeDim/2;//populationDim/chromosomeDim +1 ;
+    	//int[][] Initial_rand_chromosomes = new int[populationDim][NInitial_rand_chromosomes];
     	
-    	Initial_rand_chromosomes = Generate_Initial_rand_chromosomes(NInitial_rand_chromosomes);//genero alcuni geni iniziali casuali in modo che però siano diversi tra un chromosoma e l'altro
+    	//Initial_rand_chromosomes = Generate_Initial_rand_chromosomes(NInitial_rand_chromosomes);//genero alcuni geni iniziali casuali in modo che però siano diversi tra un chromosoma e l'altro
     	
         for (i=0; i < populationDim; i++)
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
         	
-        	for(j=0;j<NInitial_rand_chromosomes;j++){//ciclo per segnare quei geni che ho creato inizialmente
+        	/*for(j=0;j<NInitial_rand_chromosomes;j++){//ciclo per segnare quei geni che ho creato inizialmente
         		gene = Initial_rand_chromosomes[i][j];
         		used.add(gene);//metto il gene usato nella mappa
         		this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
-        	}
+        	}*/
         	for (j=NInitial_rand_chromosomes; j < chromosomeDim; j++){//ciclo per assegnare i geni rimanenti
+        		
         		gene = myGetRandom(chromosomeDim);//get a random gene
         		
+        		int prec_gene = 0; 
+        		
+        		if(j>0) 
+        			prec_gene = Integer.valueOf(this.getChromosome(i).getGene(j-1));
+        		if(prec_gene>MDVRPTWGA.instance.getVehiclesNr())//se il gene precedente era un veicolo il primo random lo scelgo tra i customer
+        		{
+        			
+        			gene=myGetRandom(MDVRPTWGA.instance.getVehiclesNr());
+        		}
         		while(used.contains(gene)){// check while is not find a unused gene
         			if(gene>=chromosomeDim)
-        				gene=1;
+        				gene=myGetRandom(chromosomeDim);
         			else
         				gene++;
         		}
