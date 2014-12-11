@@ -55,27 +55,16 @@ public class GAInitialSolution extends GAStringsSeq {
 	
 	/**
      * Create random chromosomes from the given gene space.
-     * 
-     * TODO we must rewrite it, so that there are no gene repetitions in the initial population
      */
-	//metodo che se incrementa l'indice se non lo trova anzichè riprovare con un nuovo casuale
     protected void initPopulation()
     {
-    	int i,j,gene,NInitial_rand_chromosomes = 0;//chromosomeDim/2;//populationDim/chromosomeDim +1 ;
-    	//int[][] Initial_rand_chromosomes = new int[populationDim][NInitial_rand_chromosomes];
-    	
-    	//Initial_rand_chromosomes = Generate_Initial_rand_chromosomes(NInitial_rand_chromosomes);//genero alcuni geni iniziali casuali in modo che però siano diversi tra un chromosoma e l'altro
+    	int i,j,gene = 0;//chromosomeDim/2;//populationDim/chromosomeDim +1 ;
     	
     	for (i=0; i < populationDim; i++)//STAND BY for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
-        	
-        	/*for(j=0;j<NInitial_rand_chromosomes;j++){//ciclo per segnare quei geni che ho creato inizialmente
-        		gene = Initial_rand_chromosomes[i][j];
-        		used.add(gene);//metto il gene usato nella mappa
-        		this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
-        	}*/
-        	for (j=NInitial_rand_chromosomes; j < chromosomeDim; j++){//ciclo per assegnare i geni rimanenti
+
+        	for (j = 0; j < chromosomeDim; j++){//ciclo per assegnare i geni rimanenti
         		
         		gene = myGetRandom(chromosomeDim);//get a random gene
         		
@@ -104,29 +93,7 @@ public class GAInitialSolution extends GAStringsSeq {
             }*/
         }
     }
-	
-	private int[][] Generate_Initial_rand_chromosomes(int Ninitial_rand_chromosomes) {
-		// TODO Auto-generated method stub
-		int i,j;
-		int[][] m = new int[populationDim][Ninitial_rand_chromosomes];
-		//Set<Integer[]> used = new HashSet<Integer[]>(); //mappa per memorizzare le coppie di cromosomi usati
-		
-		for(j = 0; j<populationDim;j++){
-			for(i = 0; i<Ninitial_rand_chromosomes;i++){
-				m[j][i]=j+i+1;
-				while(m[j][i]>chromosomeDim)
-					m[j][i]-=chromosomeDim;
-			}
-		}
-		return m;
-	}
 
-
-	private boolean Probability50() {
-		// TODO Auto-generated method stub
-		return (System.currentTimeMillis()%2 == 0)?true:false;
-	}
-	
 	private int myGetRandom(int range)//tra 1 e range
 	{
 		Random generator = new Random( (long) (Math.random()*System.currentTimeMillis()));
@@ -202,7 +169,6 @@ public class GAInitialSolution extends GAStringsSeq {
 		{
 			while(ChromosomeContainsGene(off1,i,par1.getGene(j)))//si blocca in questo while
 			{
-				String G = par1.getGene(j);
 				if(j>=chromosomeDim-1)
 					j=0;
 				else
@@ -220,7 +186,6 @@ public class GAInitialSolution extends GAStringsSeq {
 		{
 			while(ChromosomeContainsGene(off2,i,par2.getGene(j)))//si blocca qui dentro
 			{
-				String G = par1.getGene(j);
 				if(j>=chromosomeDim-1)
 					j=0;
 				else
@@ -235,8 +200,10 @@ public class GAInitialSolution extends GAStringsSeq {
 		}
 		Chrom1 = off1;
 		Chrom2 = off2;
-		/*controllo che il crossover abbia funzionato
-		if(check_repetitions2(off1)&&check_repetitions2(off2))
+		
+		/**controllo che il crossover abbia funzionato
+		 */
+		/*if(check_repetitions2(off1)&&check_repetitions2(off2))
 		{
 			Chrom1 = off1;
 			Chrom2 = off2;
@@ -249,7 +216,7 @@ public class GAInitialSolution extends GAStringsSeq {
 			
 			
 		
-		/*
+		/*OLD CROSSOVER
 		int iCrossoverPoint = myGetRandom(chromosomeDim-2);
         String gene1 = ((ChromStrings)Chrom1).getGene(iCrossoverPoint);
         String gene2 = ((ChromStrings)Chrom2).getGene(iCrossoverPoint);
@@ -269,7 +236,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	}
 	
 	
-	private boolean check_repetitions(ChromStrings off1) {
+	private boolean check_repetitions(ChromStrings off1) {//metodo che non viene utilizzato
 		
 		Map<String, Integer> chromosomes = new HashMap<String, Integer>();//mappa per memorizzare i cromosomi usati
 		for(int i = 1; i<=chromosomeDim;i++)
