@@ -347,9 +347,16 @@ public class GAInitialSolution extends GAStringsSeq {
 	protected double getFitness(int chromosomeIndex) {
 		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
 		MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
-		evaluateAbsolutely(mySolution);
+		//evaluateAbsolutely(mySolution);
+		GAFitnessFunction f = new GAFitnessFunction();
+		int[] GAResultInt = new int[chromosome.length];
+		for(int i=0; i<chromosome.length; i++){
+			GAResultInt[i] = Integer.valueOf(chromosome[i]);
+		}
 		
-		return Double.MAX_VALUE - mySolution.getCost().getTotalCost();
+		return 1/f.getFitness(GAResultInt, 201);
+		
+		//return Double.MAX_VALUE - mySolution.getCost().getTotalCost();
 		//return Math.random();
 	}
 	
