@@ -301,6 +301,128 @@ public class MySolution extends SolutionAdapter{
 	
 	}
 	
+	/**
+	 * Computes the distance between two points
+	 * @param x1
+	 * @param x2
+	 * @param y1
+	 * @param y2
+	 * @return
+	 */
+	private double computeDistanceBetweenPoints(double x1, double x2, double y1, double y2){
+		return Math.sqrt(Math.pow(x1 - x2, 2) +
+				Math.pow(y1 - y2, 2));
+	}
+	
+	/**
+	 * Given an array of distances and an array that describes the availability of an item,
+	 * returns the index of the nearest available item
+	 * @param neighbors
+	 * @param alreadyServed
+	 * @return
+	 */
+	private int getAvailableNearestNeighbor(double[] neighbors, boolean alreadyServed[]){
+		int nearestNeighbor = 0;
+		for(int currentNeighbor=0; currentNeighbor<neighbors.length; currentNeighbor++){
+			if(neighbors[currentNeighbor] < neighbors[nearestNeighbor] &&
+					!alreadyServed[currentNeighbor]){
+				nearestNeighbor = currentNeighbor;
+			}
+		}
+		return nearestNeighbor;
+	}
+	
+	/**
+	 * Returns the feasibility of a given route after the given customer is added.
+	 * @param route
+	 * @param customer
+	 * @return
+	 */
+	private boolean routeWouldBeFeasible(Route route, Customer customer){
+		route.addCustomer(customer);
+		evaluateRoute(route);
+		
+		if(route.getDuration() >= route.getDurationAdmited()){
+			route.removeCustomer(route.getCustomersLength());
+			evaluateRoute(route);
+			return false;
+		}else{
+			List<Customer> customers = route.getCustomers();
+			double load = 0;
+			for(Customer c : customers){
+				load += c.getCapacity();
+			}
+			if(load > route.getLoadAdmited()){
+				route.removeCustomer(route.getCustomersLength());
+				evaluateRoute(route);
+				return false;
+			}
+		}
+		
+		route.removeCustomer(route.getCustomersLength());
+		evaluateRoute(route);
+		return true;
+			
+	}
+	
+	/**
+	 * Builds the initial solution using a nearest neighbor algorithm. 
+	 * @param instance
+	 */
+	private void buildInitialRoutesWithNearestNeighbor(Instance instance){
+		int numberOfCustomers = instance.getDepot(0).getAssignedcustomers().size();
+		ArrayList<Customer> customers = instance.getDepot(0).getAssignedcustomers();
+		double[][] distances = new double[numberOfCustomers][numberOfCustomers];
+		boolean[] customerAlreadyServed = new boolean[numberOfCustomers];
+		double[] distanceFromDepot = new double[numberOfCustomers];
+		
+		for(int i=0; i<numberOfCustomers; i++){
+			customerAlreadyServed[i] = false;
+			double x1 = customers.get(i).getXCoordinate();
+			double x2 = instance.getDepot(0).getXCoordinate();
+			double y1 = customers.get(i).getYCoordinate();
+			double y2 = instance.getDepot(0).getYCoordinate();
+			distanceFromDepot[i] = computeDistanceBetweenPoints(x1, x2, y1, y2);
+		}
+		
+		for(int startCustomerIndex = 0; startCustomerIndex<numberOfCustomers; startCustomerIndex++){
+			for(int destinationCustomerIndex = 0; destinationCustomerIndex < numberOfCustomers; destinationCustomerIndex++){
+				double distance;
+				if(startCustomerIndex == destinationCustomerIndex){
+					distance = Double.MAX_VALUE;
+				}else{
+					Customer startCustomer = customers.get(startCustomerIndex);
+					Customer destinationCustomer = customers.get(destinationCustomerIndex);
+					double x1 = startCustomer.getXCoordinate();
+					double x2 = destinationCustomer.getXCoordinate();
+					double y1 = startCustomer.getYCoordinate();
+					double y2 = destinationCustomer.getYCoordinate();
+					distance = computeDistanceBetweenPoints(x1, x2, y1, y2);
+				}
+				distances[startCustomerIndex][destinationCustomerIndex] = distance;
+			}
+		}
+		
+		int routeIndex = 0;
+		int chosenCustomerIndex;
+		for(int customerIndex=0; customerIndex<numberOfCustomers; customerIndex++){
+			if(routes[0][routeIndex].isEmpty()){
+				chosenCustomerIndex = getAvailableNearestNeighbor(distanceFromDepot, customerAlreadyServed);
+			}else{
+				chosenCustomerIndex = getAvailableNearestNeighbor(distances[routes[0][routeIndex].getLastCustomerNr()], customerAlreadyServed);
+			}
+			
+			Customer chosenCustomer = instance.getDepot(0).getAssignedCustomer(chosenCustomerIndex);
+			routes[0][routeIndex].addCustomer(chosenCustomer);
+			customerAlreadyServed[chosenCustomerIndex] = true;
+			if(routeWouldBeFeasible(routes[0][routeIndex], chosenCustomer)){
+				routes[0][routeIndex].addCustomer(chosenCustomer);
+				evaluateRoute(routes[0][routeIndex]);
+			}
+		}
+		
+	}
+	
 	private void insertBestTravel(Instance instance, Route route, Customer customerChosenPtr) {
 		double minCost = Double.MAX_VALUE;
 		double tempMinCost = Double.MAX_VALUE;
