@@ -58,9 +58,15 @@ public class GAInitialSolution extends GAStringsSeq {
      */
     protected void initPopulation()
     {
-    	int i,j,gene = 0;//chromosomeDim/2;//populationDim/chromosomeDim +1 ;
+    	int i,j;
+    	//int minV = 5;//numero minimo di routes
+    	int gene = 0;
+    	int customers = 0;
+    	int veichles = 0;
+    	int VehiclesNr = MDVRPTWGA.instance.getVehiclesNr();
+    	int CustomersNr = MDVRPTWGA.instance.getCustomersNr();
     	
-    	for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
+    	for (i=0; i < populationDim; i++)//cromosomi creati casualmente
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
 
@@ -72,11 +78,13 @@ public class GAInitialSolution extends GAStringsSeq {
         		
         		if(j>0) 
         			prec_gene = Integer.valueOf(this.getChromosome(i).getGene(j-1));
-        		if(prec_gene>MDVRPTWGA.instance.getVehiclesNr())//se il gene precedente era un veicolo il primo random lo scelgo tra i customer
+        		if(prec_gene>VehiclesNr)//se il gene precedente era un veicolo il primo random lo scelgo tra i customer
         		{
-        			
-        			gene=myGetRandom(MDVRPTWGA.instance.getVehiclesNr());
+        			gene=myGetRandom(CustomersNr);
         		}
+        		//if(VehiclesNr>minV)
+        		//{
+        		//}
         		while(used.contains(gene)){// check while is not find a unused gene
         			if(gene>=chromosomeDim)
         				gene=myGetRandom(chromosomeDim);
@@ -84,13 +92,18 @@ public class GAInitialSolution extends GAStringsSeq {
         				gene++;
         		}
         		used.add(gene);//metto il gene usato nella mappa
+        		
+        		if(gene>CustomersNr)
+        			veichles++;
+        		else
+        			customers++;
         			
                 this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
         	}
-        	for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
+        	/*for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
             {
         		this.buildinitialPopulationWithNearestNeighbor(j);
-            }
+            }*/
         }
     }
     
