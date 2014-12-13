@@ -33,7 +33,8 @@ public class MySolution extends SolutionAdapter{
 		MySolution.setInstance(instance);
 		cost = new Cost();
 		initializeRoutes(instance);
-		buildInitialRoutes1(instance);
+		//buildInitialRoutes1(instance);
+		this.buildInitialRoutesWithNearestNeighbor(instance);
 		// used for input routes from file
 		alpha 	= 1;
     	beta 	= 1;
@@ -353,13 +354,13 @@ public class MySolution extends SolutionAdapter{
 				load += c.getCapacity();
 			}
 			if(load > route.getLoadAdmited()){
-				route.removeCustomer(route.getCustomersLength());
+				route.removeCustomer(route.getCustomersLength()-1);
 				evaluateRoute(route);
 				return false;
 			}
 		}
 		
-		route.removeCustomer(route.getCustomersLength());
+		route.removeCustomer(route.getCustomersLength()-1);
 		evaluateRoute(route);
 		return true;
 			
@@ -405,7 +406,7 @@ public class MySolution extends SolutionAdapter{
 		
 		int routeIndex = 0;
 		int chosenCustomerIndex;
-		for(int customerIndex=0; customerIndex<numberOfCustomers; customerIndex++){
+		for(int customerIndex=0; customerIndex<numberOfCustomers;){
 			if(routes[0][routeIndex].isEmpty()){
 				chosenCustomerIndex = getAvailableNearestNeighbor(distanceFromDepot, customerAlreadyServed);
 			}else{
@@ -413,11 +414,13 @@ public class MySolution extends SolutionAdapter{
 			}
 			
 			Customer chosenCustomer = instance.getDepot(0).getAssignedCustomer(chosenCustomerIndex);
-			routes[0][routeIndex].addCustomer(chosenCustomer);
-			customerAlreadyServed[chosenCustomerIndex] = true;
 			if(routeWouldBeFeasible(routes[0][routeIndex], chosenCustomer)){
 				routes[0][routeIndex].addCustomer(chosenCustomer);
+				customerAlreadyServed[chosenCustomerIndex] = true;
 				evaluateRoute(routes[0][routeIndex]);
+				customerIndex++;
+			}else{
+				routeIndex++;
 			}
 		}
 		

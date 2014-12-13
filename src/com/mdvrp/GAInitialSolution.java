@@ -60,7 +60,7 @@ public class GAInitialSolution extends GAStringsSeq {
     {
     	int i,j,gene = 0;//chromosomeDim/2;//populationDim/chromosomeDim +1 ;
     	
-    	for (i=0; i < populationDim; i++)//STAND BY for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
+    	for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
 
@@ -87,13 +87,96 @@ public class GAInitialSolution extends GAStringsSeq {
         			
                 this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
         	}
-        	/*for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
+        	for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
             {
-        		//STAND BY
-            }*/
+        		this.buildinitialPopulationWithNearestNeighbor(j);
+            }
         }
     }
-
+    
+    private int getAvailableNearestNeighbor(int startLocation, boolean alreadyServed[]){
+		int nearestNeighbor = 0;
+		Instance instance = MDVRPTWGA.instance;
+		for(int currentNeighbor=0; currentNeighbor<instance.getCustomersNr(); currentNeighbor++){
+			if(instance.getTravelTime(startLocation, currentNeighbor) < instance.getTravelTime(startLocation, nearestNeighbor) &&
+					!alreadyServed[currentNeighbor]){
+				nearestNeighbor = currentNeighbor;
+			}
+		}
+		return nearestNeighbor+1;
+	}
+    
+    private class MyRouteCost{
+    	public double load = 0;
+    	public double distanceTraveled = 0;
+    }
+    
+    private void buildinitialPopulationWithNearestNeighbor(int PopIndex){
+    	ChromStrings chromosome = this.getChromosome(PopIndex);
+    	int numberOfCustomers = MDVRPTWGA.instance.getDepot(0).getAssignedcustomers().size();
+		boolean[] customerAlreadyServed = new boolean[numberOfCustomers];
+		MyRouteCost myRouteCost = new MyRouteCost();
+		
+		
+		for(int i=0; i<numberOfCustomers; i++){
+			customerAlreadyServed[i] = false;
+		}
+		
+		int vehicleNumber = MDVRPTWGA.instance.getCustomersNr()+1;
+		int geneIndex=0;
+		int chosenCustomerIndex;
+		for(int customerIndex=0; customerIndex<=numberOfCustomers;){
+			if(geneIndex == 0){
+				//Primo inserimento nel cromosoma
+				chosenCustomerIndex = getAvailableNearestNeighbor(MDVRPTWGA.instance.getCustomersNr(), customerAlreadyServed);
+				chromosome.setGene(String.valueOf(chosenCustomerIndex), geneIndex);//inserisce nel chromosoma
+				geneIndex++;
+				customerAlreadyServed[chosenCustomerIndex] = true;
+				customerIndex++;break;
+			}else {
+				if(Integer.valueOf(chromosome.getGene(geneIndex-1))> numberOfCustomers){
+					chosenCustomerIndex = getAvailableNearestNeighbor(MDVRPTWGA.instance.getCustomersNr(), customerAlreadyServed);
+				}else{
+					chosenCustomerIndex = getAvailableNearestNeighbor(Integer.valueOf(chromosome.getGene(geneIndex)), customerAlreadyServed);
+				}
+			}
+			
+			String chosenCustomer = String.valueOf(chosenCustomerIndex);
+			if(routeWouldBeFeasible(myRouteCost, vehicleNumber, customerIndex-1, chosenCustomerIndex)){
+				chromosome.setGene(chosenCustomer, geneIndex);//inserisce nel chromosoma
+				geneIndex++;
+				customerAlreadyServed[chosenCustomerIndex] = true;
+				customerIndex++;
+			}else{
+/**
+ * TODO non entra mai qui!
+ */
+				vehicleNumber++;
+				chromosome.setGene(String.valueOf(vehicleNumber),geneIndex);//inserisce nel chromosoma
+				geneIndex++;
+			}
+		}
+    }
+    
+    /**
+     * Checks if, by adding customer to the vehicle, the route stays feasible.
+     * @param customer
+     * @return true if the route stay feasible, false otherwise
+     */
+    private boolean routeWouldBeFeasible(MyRouteCost cost, int vehicle, int lastCustomerIndex, int newCustomerIndex){
+    	Instance instance = MDVRPTWGA.instance;
+    	int MaxTime = MDVRPTWGA.instance.getDepot(0).getEndTw();
+    	double MaxLoad = instance.getCapacity(0, 0);
+    	
+    	cost.load += MDVRPTWGA.instance.getDepot(0).getAssignedcustomers().get(newCustomerIndex).getCapacity();
+    	cost.distanceTraveled += instance.getTravelTime(lastCustomerIndex, newCustomerIndex);
+    	if(cost.load >= MaxLoad || cost.distanceTraveled >= MaxTime){
+    		return false;
+    	}else{
+    		return true;
+    	}	
+    }
+    
 	private int myGetRandom(int range)//tra 1 e range
 	{
 		Random generator = new Random( (long) (Math.random()*System.currentTimeMillis()));
@@ -145,6 +228,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	@Override
 	protected void doOnePtCrossover(Chromosome Chrom1, Chromosome Chrom2)
 	{
+		//ALEX DICE: usare hash map
 		
 		ChromStrings off1 = new ChromStrings(chromosomeDim);
 		ChromStrings off2 = new ChromStrings(chromosomeDim);
@@ -313,7 +397,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	@Override
 	protected double getFitness(int chromosomeIndex) {
 		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
-		MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
+		//MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
 		//evaluateAbsolutely(mySolution);
 		GAFitnessFunction f = new GAFitnessFunction();
 		int[] GAResultInt = new int[chromosome.length];
@@ -424,7 +508,6 @@ public class GAInitialSolution extends GAStringsSeq {
 
 
 	public void InitialFittness() {
-		// TODO Auto-generated method stub
 		for(int i = 0; i< populationDim;i++)
 		{
 				MySolution mySolution = new MySolution(MDVRPTWGA.instance, this.getChromosome(i).getGenes());
