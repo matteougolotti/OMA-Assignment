@@ -299,6 +299,7 @@ public class MySolution extends SolutionAdapter{
 			}
 		}
 		
+		System.out.println();
 	
 	}
 	

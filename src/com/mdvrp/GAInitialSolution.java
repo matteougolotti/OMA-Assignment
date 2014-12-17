@@ -37,7 +37,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	//private Instance instance;
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
-				500, //population has N chromosomes (eventualmente parametrizzabile)
+				100, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
                 0, //random selection chance % (regardless of fitness)
@@ -61,12 +61,10 @@ public class GAInitialSolution extends GAStringsSeq {
     	int i,j;
     	//int minV = 5;//numero minimo di routes
     	int gene = 0;
-    	int customers = 0;
-    	int veichles = 0;
     	int VehiclesNr = MDVRPTWGA.instance.getVehiclesNr();
     	int CustomersNr = MDVRPTWGA.instance.getCustomersNr();
     	
-    	for (i=0; i < populationDim; i++)//cromosomi creati casualmente
+    	for (i=0; i < populationDim/2; i++)//cromosomi creati casualmente
         {
         	Set<Integer> used = new HashSet<Integer>(); //mappa per memorizzare i cromosomi usati
 
@@ -82,9 +80,7 @@ public class GAInitialSolution extends GAStringsSeq {
         		{
         			gene=myGetRandom(CustomersNr);
         		}
-        		//if(VehiclesNr>minV)
-        		//{
-        		//}
+
         		while(used.contains(gene)){// check while is not find a unused gene
         			if(gene>=chromosomeDim)
         				gene=myGetRandom(chromosomeDim);
@@ -92,18 +88,14 @@ public class GAInitialSolution extends GAStringsSeq {
         				gene++;
         		}
         		used.add(gene);//metto il gene usato nella mappa
-        		
-        		if(gene>CustomersNr)
-        			veichles++;
-        		else
-        			customers++;
         			
                 this.getChromosome(i).setGene(String.valueOf(gene),j);//old :((ChromStrings)this.chromosomes[i]).setGene(getRandomGeneFromPossGenes(), j);
         	}
-        	/*for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
-            {
-        		this.buildinitialPopulationWithNearestNeighbor(j);
-            }*/
+        }
+    	
+    	for (i=populationDim/2; i < populationDim; i++)//cromosomi creati con algoritmo cluster
+        {
+    		this.buildinitialPopulationWithNearestNeighbor(i);
         }
     }
     
@@ -124,51 +116,55 @@ public class GAInitialSolution extends GAStringsSeq {
     	public double distanceTraveled = 0;
     }
     
-    private void buildinitialPopulationWithNearestNeighbor(int PopIndex){
-    	ChromStrings chromosome = this.getChromosome(PopIndex);
+    private void buildinitialPopulationWithNearestNeighbor(int chrIndex){
     	int numberOfCustomers = MDVRPTWGA.instance.getDepot(0).getAssignedcustomers().size();
 		boolean[] customerAlreadyServed = new boolean[numberOfCustomers];
 		MyRouteCost myRouteCost = new MyRouteCost();
-		
 		
 		for(int i=0; i<numberOfCustomers; i++){
 			customerAlreadyServed[i] = false;
 		}
 		
-		int vehicleNumber = MDVRPTWGA.instance.getCustomersNr()+1;
+		int vehicleNumber = MDVRPTWGA.instance.getCustomersNr();
 		int geneIndex=0;
 		int chosenCustomerIndex;
-		for(int customerIndex=0; customerIndex<=numberOfCustomers;){
+		for(int customerIndex=1; customerIndex<=numberOfCustomers;){
 			if(geneIndex == 0){
 				//Primo inserimento nel cromosoma
 				chosenCustomerIndex = getAvailableNearestNeighbor(MDVRPTWGA.instance.getCustomersNr(), customerAlreadyServed);
-				chromosome.setGene(String.valueOf(chosenCustomerIndex), geneIndex);//inserisce nel chromosoma
-				geneIndex++;
-				customerAlreadyServed[chosenCustomerIndex] = true;
-				customerIndex++;break;
 			}else {
-				if(Integer.valueOf(chromosome.getGene(geneIndex-1))> numberOfCustomers){
+				if(Integer.valueOf(this.getChromosome(chrIndex).getGene(geneIndex-1))> numberOfCustomers){
 					chosenCustomerIndex = getAvailableNearestNeighbor(MDVRPTWGA.instance.getCustomersNr(), customerAlreadyServed);
 				}else{
-					chosenCustomerIndex = getAvailableNearestNeighbor(Integer.valueOf(chromosome.getGene(geneIndex)), customerAlreadyServed);
+					chosenCustomerIndex = getAvailableNearestNeighbor(Integer.valueOf(this.getChromosome(chrIndex).getGene(geneIndex-1)), customerAlreadyServed);
 				}
 			}
 			
 			String chosenCustomer = String.valueOf(chosenCustomerIndex);
-			if(routeWouldBeFeasible(myRouteCost, vehicleNumber, customerIndex-1, chosenCustomerIndex)){
-				chromosome.setGene(chosenCustomer, geneIndex);//inserisce nel chromosoma
+			if(routeWouldBeFeasible(myRouteCost, vehicleNumber, customerIndex-1, chosenCustomerIndex) &&
+					!customerAlreadyServed[chosenCustomerIndex]){
+				this.getChromosome(chrIndex).setGene(chosenCustomer, geneIndex);//inserisce nel chromosoma
 				geneIndex++;
 				customerAlreadyServed[chosenCustomerIndex] = true;
+				myRouteCost.load += MDVRPTWGA.instance.getDepot(0).getAssignedcustomers().get(chosenCustomerIndex).getCapacity();
+				myRouteCost.distanceTraveled += MDVRPTWGA.instance.getTravelTime(customerIndex-1, chosenCustomerIndex);
 				customerIndex++;
 			}else{
-/**
- * TODO non entra mai qui!
- */
+				myRouteCost.load = 0;
+				myRouteCost.distanceTraveled = 0;
 				vehicleNumber++;
-				chromosome.setGene(String.valueOf(vehicleNumber),geneIndex);//inserisce nel chromosoma
+				this.getChromosome(chrIndex).setGene(String.valueOf(vehicleNumber),geneIndex);//inserisce nel chromosoma
 				geneIndex++;
 			}
+			
 		}
+		
+		for(int i=geneIndex; i<chromosomeDim; i++){
+			this.getChromosome(chrIndex).setGene(String.valueOf(vehicleNumber), i);
+			vehicleNumber++;
+		}
+		
+		System.out.println("DONE!" + chrIndex);
     }
     
     /**
@@ -523,9 +519,9 @@ public class GAInitialSolution extends GAStringsSeq {
 	public void InitialFittness() {
 		for(int i = 0; i< populationDim;i++)
 		{
-				MySolution mySolution = new MySolution(MDVRPTWGA.instance, this.getChromosome(i).getGenes());
-				this.evaluateAbsolutely(mySolution);
-				this.getChromosome(i).setFitness(mySolution.getCost().getTotalCost());
+			MySolution mySolution = new MySolution(MDVRPTWGA.instance, this.getChromosome(i).getGenes());
+			this.evaluateAbsolutely(mySolution);
+			this.getChromosome(i).setFitness(mySolution.getCost().getTotalCost());
 		}
 		
 	}
