@@ -1,14 +1,9 @@
 package com.mdvrp;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.coinor.opents.Solution;
-
-import com.TabuSearch.MySolution;
 import com.softtechdesign.ga.ChromStrings;
 import com.softtechdesign.ga.Chromosome;
 import com.softtechdesign.ga.Crossover;
@@ -34,7 +29,7 @@ public class GAInitialSolution extends GAStringsSeq {
      * @throws GAException
      */
 	private int countCross = 0;
-	//private Instance instance;
+
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
 				100, //population has N chromosomes (eventualmente parametrizzabile)
@@ -59,7 +54,6 @@ public class GAInitialSolution extends GAStringsSeq {
     protected void initPopulation()
     {
     	int i,j;
-    	//int minV = 5;//numero minimo di routes
     	int gene = 0;
     	int VehiclesNr = MDVRPTWGA.instance.getVehiclesNr();
     	int CustomersNr = MDVRPTWGA.instance.getCustomersNr();
@@ -293,33 +287,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		}
 		Chrom1 = off1;
 		Chrom2 = off2;
-		
-		/**controllo che il crossover abbia funzionato
-		 */
-		/*if(check_repetitions2(off1)&&check_repetitions2(off2))
-		{
-			Chrom1 = off1;
-			Chrom2 = off2;
-			//System.out.println((++countCross)+" cross over ok");;
-		}
-		else
-		{
-			//System.out.println((++countCross)+" cross over ko!");
-		}*/
 			
-			
-		
-		/*OLD CROSSOVER
-		int iCrossoverPoint = myGetRandom(chromosomeDim-2);
-        String gene1 = ((ChromStrings)Chrom1).getGene(iCrossoverPoint);
-        String gene2 = ((ChromStrings)Chrom2).getGene(iCrossoverPoint);
-
-                // CREATE OFFSPRING ONE
-        ((ChromStrings)Chrom1).setGene(gene2, iCrossoverPoint);
-
-                // CREATE OFFSPRING TWO
-        ((ChromStrings)Chrom2).setGene(gene1, iCrossoverPoint);
-        */
 		synchronized(this){
 			countCross++;
 		}
@@ -327,72 +295,9 @@ public class GAInitialSolution extends GAStringsSeq {
 		//System.out.println(off1.toString());
 		//System.out.println(off2.toString() + "\n");
 	}
-	
-	
-	private boolean check_repetitions(ChromStrings off1) {//metodo che non viene utilizzato
-		
-		Map<String, Integer> chromosomes = new HashMap<String, Integer>();//mappa per memorizzare i cromosomi usati
-		for(int i = 1; i<=chromosomeDim;i++)
-		{
-			chromosomes.put(String.valueOf(i), 0);
-		}
-		for(int i = 0;i<off1.getGenes().length;i++)
-		{
-			Object v =chromosomes.get(off1.getGene(i));
-			
-			if( v !=null)
-			{
-				if((int)v == 1)
-					return false;//gene già utilizzato
-				else
-				{
-					chromosomes.remove(off1.getGene(i));
-					chromosomes.put(off1.getGene(i),1);
-				}
-				
-			}
-			else
-				return false;//gene non presente
-		}
-		
-		return true;
-	}
-	private boolean check_repetitions2(ChromStrings off1) {//per annulare la ripetizione e inserire il chromosoma mancante
-		boolean[] presente = new boolean[chromosomeDim];//vettore per vedere quale chromosoma non è stato ripetuto
-		int index_off = 0;
-		String gene_rip = null;
-		
-		for(int i = 0; i<chromosomeDim;i++)//inizializzo vettore per segnare se un gene è presente
-		{
-			presente[i]=false;
-		}
-		for(int i = 0;i<off1.getGenes().length;i++)//scorro l'offspring se è presente metto true altrimenti mi segno l'indice
-		{
-			String gene = off1.getGene(i);
-			
-			int index = Integer.valueOf(gene)-1;
-			
-			if(presente[index]){
-				gene_rip = gene;
-				index_off= i;
-			}	
-			else
-				presente[index]=true;
-		}
-		for(int i = 0; i<chromosomeDim;i++)//scorro di nuovo il vettore presente quando trovo un valore che non c'è lo metto nell'indice che ho memorizzato prima ovvero il gene duplicato
-		{
-			if(!presente[i])
-				off1.setGene(String.valueOf(i+1), index_off);
-				
-		}	
-		return (gene_rip==null)?true:false;
-	}
-
 
 	private boolean ChromosomeContainsGene(ChromStrings c, int last, String gene)
 	{ 
-		//boolean trovato = false;
-		
 		for(int i = 0;i<last; i++)
 		{
 			if(c.getGene(i).equals(gene))
@@ -414,114 +319,24 @@ public class GAInitialSolution extends GAStringsSeq {
 			GAResultInt[i] = Integer.valueOf(chromosome[i]);
 		}
 		
-		return 1/f.getFitness(GAResultInt, 201);
+		return 1/f.getFitness(GAResultInt, MDVRPTWGA.instance.getCustomersNr() + 1);
 		
 		//return Double.MAX_VALUE - mySolution.getCost().getTotalCost();
 		//return Math.random();
 	}
-	
-	/**
-	 * Ho usato il codice qua sotto per calcolare la fitness, e sembra funzionare piu o meno
-	 * anche se ritorna un valore di fitness enorme.
-	 * Se volete provarlo vi basta togliere i commenti all'inizio e alla fine,
-	 *  e i coomenti da getFitness qui sopra
-	 */
-	
-	private void evaluateAbsolutely(Solution solution){
-    	MySolution sol = (MySolution)solution;
-    	Route route;
-    	
-    	sol.getCost().initialize();
-		for (int i = 0; i < sol.getDepotsNr(); ++i) {
-			for(int j = 0; j < sol.getDepotVehiclesNr(i); ++j){
-				route = sol.getRoute(i, j);
-		    	// do the math only if the route is not empty
-				if(!route.isEmpty()) {
-					evaluateRoute(route);
-					sol.getCost().travelTime += route.getCost().getTravel();
-					sol.getCost().load += route.getCost().load;
-					sol.getCost().serviceTime += route.getCost().serviceTime;
-					sol.getCost().waitingTime += route.getCost().waitingTime;
-					sol.getCost().addLoadViol(route.getCost().getLoadViol());
-					sol.getCost().addDurationViol(route.getCost().getDurationViol());
-					sol.getCost().addTWViol(route.getCost().getTwViol());
-					
-				} // end if route not empty
-			}// end for vehicles
-		}// end for depots
-		sol.getCost().calculateTotalCostViol();
-	}// end method evaluateAbsolutely
-
-	private void evaluateRoute(Route route) {
-    	double totalTime = 0;
-    	double waitingTime = 0;
-    	double twViol = 0;
-    	Customer customerK;
-    	route.initializeTimes();
-    	// do the math only if the route is not empty
-		if(!route.isEmpty()){
-	    	// sum distances between each node in the route
-			for (int k = 0; k < route.getCustomersLength(); ++k){
-				// get the actual customer
-				customerK = route.getCustomer(k);
-				// add travel time to the route
-				if(k == 0){
-					route.getCost().travelTime += MDVRPTWGA.instance.getTravelTime(route.getDepotNr(), customerK.getNumber());
-					totalTime += MDVRPTWGA.instance.getTravelTime(route.getDepotNr(), customerK.getNumber());
-				}else{
-					route.getCost().travelTime += MDVRPTWGA.instance.getTravelTime(route.getCustomerNr(k -1), customerK.getNumber());
-					totalTime += MDVRPTWGA.instance.getTravelTime(route.getCustomerNr(k -1), customerK.getNumber());
-				} // end if else
-				
-				customerK.setArriveTime(totalTime);
-				// add waiting time if any
-				waitingTime = Math.max(0, customerK.getStartTw() - totalTime);
-				route.getCost().waitingTime += waitingTime;
-				// update customer timings information
-				customerK.setWaitingTime(waitingTime);
-				
-				totalTime = Math.max(customerK.getStartTw(), totalTime);
-
-				// add time window violation if any
-				twViol = Math.max(0, totalTime - customerK.getEndTw());
-				route.getCost().addTWViol(twViol);
-				customerK.setTwViol(twViol);
-				// add the service time to the total
-				totalTime += customerK.getServiceDuration();
-				// add service time to the route
-				route.getCost().serviceTime += customerK.getServiceDuration();
-				// add capacity to the route
-				route.getCost().load += customerK.getCapacity();
-				
-			} // end for customers
-			
-			// add the distance to return to depot: from last node to depot
-			totalTime += MDVRPTWGA.instance.getTravelTime(route.getLastCustomerNr(), route.getDepotNr());
-			route.getCost().travelTime += MDVRPTWGA.instance.getTravelTime(route.getLastCustomerNr(), route.getDepotNr());
-			// add the depot time window violation if any
-			twViol = Math.max(0, totalTime - route.getDepot().getEndTw());
-			route.getCost().addTWViol(twViol);
-			// update route with timings of the depot
-			route.setDepotTwViol(twViol);
-			route.setReturnToDepotTime(totalTime);
-			route.getCost().setLoadViol(Math.max(0, route.getCost().load - route.getLoadAdmited()));
-			route.getCost().setDurationViol(Math.max(0, route.getDuration() - route.getDurationAdmited()));
-			
-			route.getCost().setTravelTime(route.getCost().travelTime);
-			// update total violation
-			route.getCost().calculateTotalCostViol();
-			
-		} // end if route not empty
-		
-    } // end method evaluate route
 
 
 	public void InitialFittness() {
 		for(int i = 0; i< populationDim;i++)
 		{
-			MySolution mySolution = new MySolution(MDVRPTWGA.instance, this.getChromosome(i).getGenes());
-			this.evaluateAbsolutely(mySolution);
-			this.getChromosome(i).setFitness(mySolution.getCost().getTotalCost());
+			String []chromosome = this.getChromosome(i).getGenes();
+			GAFitnessFunction f = new GAFitnessFunction();
+			int[] GAResultInt = new int[chromosome.length];
+			for(int j=0; j<chromosome.length; j++){
+				GAResultInt[j] = Integer.valueOf(chromosome[j]);
+			}
+			
+			this.getChromosome(i).setFitness(1/f.getFitness(GAResultInt, MDVRPTWGA.instance.getCustomersNr() + 1));
 		}
 		
 	}
