@@ -39,17 +39,17 @@ private static Duration d = new Duration();
 				d.stop();
 				minutes += d.getMinutes();
 				seconds += d.getSeconds();
-				String outSol = "ANALISI :";
-				Parameters parameters = MDVRPTWGA.instance.getParameters();
-		        FileWriter fw = null;
-				try {
+				//String outSol = "ANALISI :";
+				//Parameters parameters = MDVRPTWGA.instance.getParameters();
+		        //FileWriter fw = null;
+				/*try {
 					fw = new FileWriter(parameters.getOutputFileName(),true);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		        fw.write(outSol);
-		        fw.close();
+		        fw.close();*/
 				System.out.println("FINE."+" elapsed time : "+minutes+"."+seconds+"''");
 			}
 			for(int i = 0; i < MAX; i++)
@@ -70,7 +70,7 @@ private static Duration d = new Duration();
 			d.stop();
 			minutes += d.getMinutes();
 			seconds += d.getSeconds();
-			String outSol = "ANALISI :";
+			/*String outSol = "ANALISI :";
 			Parameters parameters = MDVRPTWGA.instance.getParameters();
 	        FileWriter fw = null;
 			try {
@@ -80,7 +80,7 @@ private static Duration d = new Duration();
 				e.printStackTrace();
 			}
 	        fw.write(outSol);
-	        fw.close();
+	        fw.close();*/
 			System.out.println("FINE."+" elapsed time : "+minutes+"."+seconds+"''");
 
 	}
