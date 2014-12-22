@@ -282,7 +282,7 @@ public class MySolution extends SolutionAdapter{
 			}else {
 				//Select customer number (GAResult[i]-1)
 				for(int j=0; j<instance.getDepot(0).getAssignedCustomersNr(); j++){
-					if(instance.getDepot(0).getAssignedCustomer(j).getNumber() == (GAResultInt[i] - 1)){
+					if(instance.getDepot(0).getAssignedCustomer(j).getNumber() == (GAResultInt[i]-1)){
 						customerChosenPtr = instance.getDepot(0).getAssignedCustomer(j);
 						break;
 					}

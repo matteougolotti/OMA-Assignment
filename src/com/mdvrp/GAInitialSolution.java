@@ -33,7 +33,7 @@ public class GAInitialSolution extends GAStringsSeq {
 
 	public GAInitialSolution(String genes[], Instance instance) throws GAException {
 		super(  instance.getCustomersNr()+instance.getVehiclesNr()-1, //size of chromosome (number of customers + number of vehicles)
-				3000, //population has N chromosomes (eventualmente parametrizzabile)
+				300, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
                 0, //random selection chance % (regardless of fitness)
