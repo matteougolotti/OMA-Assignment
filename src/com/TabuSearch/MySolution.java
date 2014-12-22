@@ -7,6 +7,7 @@ import org.coinor.opents.*;
 import com.mdvrp.Cost;
 import com.mdvrp.Customer;
 import com.mdvrp.Instance;
+import com.mdvrp.MDVRPTWGA;
 import com.mdvrp.Route;
 import com.mdvrp.Vehicle;
 
@@ -33,8 +34,8 @@ public class MySolution extends SolutionAdapter{
 		MySolution.setInstance(instance);
 		cost = new Cost();
 		initializeRoutes(instance);
-		//buildInitialRoutes1(instance);
-		this.buildInitialRoutesWithNearestNeighbor(instance);
+		buildInitialRoutes1(instance);
+		//this.buildInitialRoutesWithNearestNeighbor(instance);
 		// used for input routes from file
 		alpha 	= 1;
     	beta 	= 1;
@@ -51,7 +52,7 @@ public class MySolution extends SolutionAdapter{
 		MySolution.setInstance(instance);
 		cost = new Cost();
 		initializeRoutes(instance);
-		this.buildInitialRoutesFromGA(instance, GAResult);
+		buildInitialRoutesFromGA(instance, GAResult);
 		// used for input routes from file
 		alpha 	= 1;
     	beta 	= 1;
@@ -237,70 +238,61 @@ public class MySolution extends SolutionAdapter{
 	 */
 
 	private void buildInitialRoutesFromGA(Instance instance, String GAResult[]){
-		Route route; // stores the pointer to the current route
-		Customer customerChosenPtr; // stores the pointer to the customer chosen from depots list assigned customers
-		int assignedCustomersNr;
+		Customer customerChosenPtr = null; // stores the pointer to the customer chosen from depots list assigned customers
 		int startCustomer;
-		int customerChosen; // serve to cycle j, j+1, ... assignedcustomersnr, 0, ... j-1
 		int [] GAResultInt = new int [GAResult.length];
 		
-		int[] trovato = new int[100];
-		int count =0;
+		//int[] trovato = new int[100];
+		//int count =0;
 		
 		for(int i=0; i<GAResult.length; i++){
 			GAResultInt[i] = Integer.valueOf(GAResult[i]);
-			if(GAResultInt[i]>instance.getCustomersNr()){
-				trovato[count]=GAResultInt[i];count++;
-				if(count>instance.getVehiclesNr()-1)
-				{   
-					System.out.println("troppi veicoli");
-					for(int j = 0; j< count; j++)
-						System.out.println(j+" -> "+trovato[j]);
+			//if(GAResultInt[i]>instance.getCustomersNr()){
+				//trovato[count]=GAResultInt[i];count++;
+				//if(count>instance.getVehiclesNr()-1)
+				//{   
+					//System.out.println("troppi veicoli");
+					//for(int j = 0; j< count; j++)
+						//System.out.println(j+" -> "+trovato[j]);
 					
-				}
-			}
-			/*if(GAResultInt[i]>instance.getCustomersNr())
-			{
-				GAResultInt[i]=0;
-				trovato++;
-			}*/
+				//}
+			//}
+			//if(GAResultInt[i]>instance.getCustomersNr())
+			//{
+				//GAResultInt[i]=0;
+				//trovato++;
+			//}
 			
 		}
 
-		int start_index = 0;
-		assignedCustomersNr = instance.getCustomersNr();//instance.getDepot(0).getAssignedCustomersNr(); nel nostro caso
 		if(instance.getParameters().getStartClient() != -1) {
 			startCustomer = instance.getParameters().getStartClient();
 		}else{
-			startCustomer = GAResultInt[start_index];
+			startCustomer = GAResultInt[0];
 			instance.getParameters().setStartClient(startCustomer);
 		}
 		
 		int vehicleIndex = 0;
 		int routeIndex = 0;
-		for(int i=start_index; i<GAResultInt.length; i++){
-			//Current customer is the depot
-			/*if(GAResultInt[i] == 0){
-				if(vehicleIndex<49){//da vedere
-				evaluateRoute(routes[0][vehicleIndex]);
-				vehicleIndex++;
-				routeIndex = 0;}*/
+		for(int i=0; i<GAResultInt.length; i++){
 			if(GAResultInt[i] > instance.getCustomersNr()){
 				evaluateRoute(routes[0][vehicleIndex]);
 				vehicleIndex++;
 				routeIndex = 0;
-			
-			}
-			else
-			{
-				customerChosenPtr = instance.getDepot(0).getAssignedCustomer(GAResultInt[i]-1);//decremento perchè i codici dei geni variano da 1->N_cust invece l'indice deve variare da 0->N_cust-1
+			}else {
+				//Select customer number (GAResult[i]-1)
+				for(int j=0; j<instance.getDepot(0).getAssignedCustomersNr(); j++){
+					if(instance.getDepot(0).getAssignedCustomer(j).getNumber() == (GAResultInt[i] - 1)){
+						customerChosenPtr = instance.getDepot(0).getAssignedCustomer(j);
+						break;
+					}
+				}
+				/*customerChosenPtr = instance.getDepot(0).getAssignedCustomer(GAResultInt[i]-1);*/
 				routes[0][vehicleIndex].addCustomer(customerChosenPtr, routeIndex);
 				routeIndex++;
 			}
 		}
-		
 		System.out.println();
-	
 	}
 	
 	/**

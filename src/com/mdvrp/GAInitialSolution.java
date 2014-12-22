@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import com.TabuSearch.MySolution;
 import com.softtechdesign.ga.ChromStrings;
 import com.softtechdesign.ga.Chromosome;
 import com.softtechdesign.ga.Crossover;
@@ -44,7 +45,6 @@ public class GAInitialSolution extends GAStringsSeq {
                 genes, //gene space (possible gene values)
                 Crossover.ctOnePoint,//ctTwoPoint, //crossover type
                 true); //compute statisitics?
-				//this.instance = new Instance(instance.getParameters());
 	}
 
 	
@@ -182,7 +182,6 @@ public class GAInitialSolution extends GAStringsSeq {
 			this.getChromosome(chrIndex).setGene(String.valueOf(vehicleNumber), i);
 		}
 		
-		System.out.println("DONE!" + chrIndex);
     }
     
     /**
@@ -210,6 +209,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		int a = generator.nextInt(range-1)+1 ;
 		return a;
 	}
+	
 	@Override
 	protected void doRandomMutation(int iChromIndex){//inverte casualmente due geni di un cromosoma
 		
@@ -225,6 +225,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		this.getChromosome(iChromIndex).setGene(this.getChromosome(iChromIndex).getGene(SecondGene), FirstGene);
 		this.getChromosome(iChromIndex).setGene(temp, SecondGene);
 	}
+	
 	@Override
 	protected void doTwoPtCrossover(Chromosome Chrom1, Chromosome Chrom2){
 		ChromStrings chr1 = (ChromStrings)Chrom1;
@@ -262,10 +263,6 @@ public class GAInitialSolution extends GAStringsSeq {
 		ChromStrings par1 = (ChromStrings)Chrom1;
 		ChromStrings par2 = (ChromStrings)Chrom2;
 		
-		//System.out.println("Do crossover "+this.countCross);
-		//System.out.println(par1.toString());
-		//System.out.println(par2.toString() + "\n");
-		
 		int i,j;
 		int t = myGetRandom(chromosomeDim-2);//taglio
 		
@@ -278,7 +275,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		j=t;//indice parent
 		for(i=t;i<chromosomeDim;i++)//indice dell'offspring
 		{
-			while(ChromosomeContainsGene(off1,i,par1.getGene(j)))//si blocca in questo while
+			while(ChromosomeContainsGene(off1,i,par1.getGene(j)))
 			{
 				if(j>=chromosomeDim-1)
 					j=0;
@@ -286,7 +283,7 @@ public class GAInitialSolution extends GAStringsSeq {
 					j++;
 			}
 			off1.setGene(par1.getGene(j), i);
-			//System.out.println(off1.toString());
+			
 			if(j>=chromosomeDim-1)
 				j=0;
 			else
@@ -295,7 +292,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		j=t;
 		for(i=t;i<chromosomeDim;i++)
 		{
-			while(ChromosomeContainsGene(off2,i,par2.getGene(j)))//si blocca qui dentro
+			while(ChromosomeContainsGene(off2,i,par2.getGene(j)))
 			{
 				if(j>=chromosomeDim-1)
 					j=0;
@@ -303,7 +300,7 @@ public class GAInitialSolution extends GAStringsSeq {
 					j++;
 			}
 			off2.setGene(par2.getGene(j), i);
-			//System.out.println(off2.toString());
+			
 			if(j>=chromosomeDim-1)
 				j=0;
 			else
@@ -315,9 +312,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		synchronized(this){
 			countCross++;
 		}
-		//System.out.println("Do crossover "+this.countCross);
-		//System.out.println(off1.toString());
-		//System.out.println(off2.toString() + "\n");
+		
 	}
 
 	private boolean ChromosomeContainsGene(ChromStrings c, int last, String gene)
@@ -336,7 +331,6 @@ public class GAInitialSolution extends GAStringsSeq {
 	protected double getFitness(int chromosomeIndex) {
 		String []chromosome = this.getChromosome(chromosomeIndex).getGenes();
 		//MySolution mySolution = new MySolution(MDVRPTWGA.instance, chromosome);
-		//evaluateAbsolutely(mySolution);
 		GAFitnessFunction f = new GAFitnessFunction();
 		int[] GAResultInt = new int[chromosome.length];
 		for(int i=0; i<chromosome.length; i++){
@@ -345,7 +339,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		
 		return 1/f.getFitness(GAResultInt, MDVRPTWGA.instance.getCustomersNr() + 1);
 		
-		//return Double.MAX_VALUE - mySolution.getCost().getTotalCost();
+		//return 1/mySolution.getCost().getTotalCost();
 		//return Math.random();
 	}
 
