@@ -229,6 +229,7 @@ public class MySolution extends SolutionAdapter{
 				}
 			} // end for customer list
 		}
+		
 	}
 	
 	/**
@@ -282,17 +283,17 @@ public class MySolution extends SolutionAdapter{
 			}else {
 				//Select customer number (GAResult[i]-1)
 				for(int j=0; j<instance.getDepot(0).getAssignedCustomersNr(); j++){
-					if(instance.getDepot(0).getAssignedCustomer(j).getNumber() == (GAResultInt[i]-1)){
+					if(instance.getDepot(0).getAssignedCustomer(j).getNumber() == (GAResultInt[i])){
 						customerChosenPtr = instance.getDepot(0).getAssignedCustomer(j);
 						break;
 					}
 				}
-				/*customerChosenPtr = instance.getDepot(0).getAssignedCustomer(GAResultInt[i]-1);*/
+
 				routes[0][vehicleIndex].addCustomer(customerChosenPtr, routeIndex);
 				routeIndex++;
 			}
 		}
-		System.out.println();
+		
 	}
 	
 	/**

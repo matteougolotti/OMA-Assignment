@@ -15,6 +15,9 @@ public class GAFitnessFunction {
 		double[] arrivalTimes = new double[instance.getCustomersNr()];
 		Customer firstCustomer, secondCustomer;
 		
+		//for(int j=0; j<instance.getCustomersNr(); j++)
+			//System.out.print(" " + chr[j] + " ");
+		
 		for(currentGeneIndex=0; currentGeneIndex < chr.length; currentGeneIndex++){
 			if(chr[currentGeneIndex] >= firstVehicleValue){
 				//Siamo in un veicolo
@@ -30,7 +33,7 @@ public class GAFitnessFunction {
 					double y2 = instance.getDepot(0).getYCoordinate();
 				
 					double distance = Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2);
-					arrivalTimes[chr[currentGeneIndex]-1] = vehicleTime[currentVehicleIndex] + distance;
+					arrivalTimes[chr[currentGeneIndex]] = vehicleTime[currentVehicleIndex] + distance;
 					vehicleTime[currentVehicleIndex] += distance + firstCustomer.getServiceDuration();
 					cost += distance;
 					firstRouteCustomer = false;
@@ -44,14 +47,14 @@ public class GAFitnessFunction {
 					double y2 = secondCustomer.getYCoordinate();
 				
 					double distance = Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2);
-					arrivalTimes[chr[currentGeneIndex]-1] = vehicleTime[currentVehicleIndex] + distance;
+					arrivalTimes[chr[currentGeneIndex]] = vehicleTime[currentVehicleIndex] + distance;
 					vehicleTime[currentVehicleIndex] += distance + firstCustomer.getServiceDuration();
 					cost += distance;
 				}
 				
 				cost += firstCustomer.getCapacity();
 				cost += firstCustomer.getServiceDuration();
-				cost += Math.max(0, firstCustomer.getStartTw() - arrivalTimes[chr[currentGeneIndex]-1]);
+				cost += Math.max(0, firstCustomer.getStartTw() - arrivalTimes[chr[currentGeneIndex]]);
 				
 			}
 			
@@ -62,10 +65,13 @@ public class GAFitnessFunction {
 	private Customer getCustomer(int customerNumber){
 		Instance instance = MDVRPTWGA.instance;
 		
-		//TODO Qui c'è un bug, perche viene ritornato il customer con id = customerNumber-1 invece di customerNumber
+		/*for(int i=0; i<instance.getDepot(0).getAssignedCustomersNr(); i++)
+			System.out.println("Customer: " + i + "Number: " + instance.getDepot(0).getAssignedCustomer(i).getNumber() + " ");
 		
+		System.out.println("\n\n");
+		*/
 		for(int i=0; i<instance.getCustomersNr(); i++){
-			if(instance.getDepot(0).getAssignedCustomer(i).getNumber() == (customerNumber-1)){
+			if(instance.getDepot(0).getAssignedCustomer(i).getNumber() == (customerNumber)){
 				return instance.getDepot(0).getAssignedCustomer(i);
 			}
 		}
