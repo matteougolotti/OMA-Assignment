@@ -7,7 +7,6 @@ import org.coinor.opents.*;
 import com.mdvrp.Cost;
 import com.mdvrp.Customer;
 import com.mdvrp.Instance;
-import com.mdvrp.MDVRPTWGA;
 import com.mdvrp.Route;
 import com.mdvrp.Vehicle;
 
