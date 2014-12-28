@@ -1,15 +1,11 @@
 package com.mdvrp;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import com.TabuSearch.MySolution;
 import com.softtechdesign.ga.ChromStrings;
 import com.softtechdesign.ga.Chromosome;
 import com.softtechdesign.ga.Crossover;
@@ -42,7 +38,7 @@ public class GAInitialSolution extends GAStringsSeq {
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
                 10,//0, //random selection chance % (regardless of fitness)
-                1000, //max generations
+                60, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
                 0.1,//0.06, //chromosome mutation prob.
@@ -382,7 +378,7 @@ public class GAInitialSolution extends GAStringsSeq {
 	/*
 	 * (non-Javadoc)
 	 * @see com.softtechdesign.ga.GAStringsSeq#doTwoPtCrossover(com.softtechdesign.ga.Chromosome, com.softtechdesign.ga.Chromosome)
-	 * idea: crossover che tenga conto delle route 
+	 * idea: crossover che tenga conto delle route, mescolo le rotte e prendo quelle col costo minore(off1) e maggiore(off2) 
 	 */
 	protected void doTwoPtCrossover(Chromosome Chrom1, Chromosome Chrom2){	
 		
@@ -396,8 +392,6 @@ public class GAInitialSolution extends GAStringsSeq {
 		routesCosts.add(0, 0.0);
 		routesCosts.add(1, 0.0);
 		
-		ChromStrings off1 = new ChromStrings(chromosomeDim);
-		ChromStrings off2 = new ChromStrings(chromosomeDim);
 		ChromStrings par1 = (ChromStrings)Chrom1;
 		ChromStrings par2 = (ChromStrings)Chrom2;
 		
@@ -472,17 +466,13 @@ public class GAInitialSolution extends GAStringsSeq {
 			}
 		}
 		
-		//ordinamento routes per costo crescente
+		//ordinamento routes per costo crescente e creazione off1 assemblando le routes
 		SortAscendent(routes,routesCosts);	
-		//creazione nuovi figli assemblando le routes
 		Chrom1 = CreateOffspring((ChromStrings)Chrom1,routes);
 		
-		//ordinamento routes per costo decrescente
+		//ordinamento routes per costo decrescente e creazione off2 assemblando le routes
 		SortDescendent(routes,routesCosts);
-		//creazione nuovi figli assemblando le routes
 		Chrom2 = CreateOffspring((ChromStrings)Chrom2,routes);
-		
-		
 	}
 
 	private ChromStrings CreateOffspring(ChromStrings off1, List<Set<String>> routes) {

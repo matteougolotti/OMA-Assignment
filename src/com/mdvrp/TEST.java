@@ -61,8 +61,12 @@ private static Duration d = new Duration();
 					seconds-=60*m;
 					minutes+=m;
 				}
-					
+				
+				System.out.println("##################################");
+				System.out.println(" ");
 				System.out.println("IT -> "+(i+1)+" elapsed time : "+minutes+"."+seconds+"''");
+				System.out.println(" ");
+				System.out.println("##################################");
 				d.start();
 			}
 			

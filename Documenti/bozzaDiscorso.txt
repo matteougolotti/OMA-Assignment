@@ -1,0 +1,4 @@
+Starting from the given project we notice that the implemented Tabu Search works fast end find quite good solutions.
+So we decided to initially improve the quality of the solution rather than the time of execution.
+But using only the Tabu we doesn’t found any significant improvment in quality.
+So we decided to use an hibryd alghoritm

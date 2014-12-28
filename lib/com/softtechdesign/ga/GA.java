@@ -383,8 +383,7 @@ public abstract class GA implements Runnable
                 this.genAvgFitness[iGen] = getAvgFitness();
             }
 
-            iGen++;System.out.println("Generation: " + iGen + " best chr fitness: " + getFittestChromosomesFitness() + "\n"
-            		+ "Fittest Chromosome: " + getFittestChromosome());
+            iGen++;//System.out.println("Generation: " + iGen + " best chr fitness: " + getFittestChromosomesFitness() + "\n"+ "Fittest Chromosome: " + getFittestChromosome());
         }
 
         System.out.println("GEN " + (iGen + 1) + " AVG FITNESS = " + this.genAvgFitness[iGen-1] +
