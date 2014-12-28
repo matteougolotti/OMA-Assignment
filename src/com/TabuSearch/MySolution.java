@@ -275,12 +275,11 @@ public class MySolution extends SolutionAdapter{
 		int vehicleIndex = 0;
 		int routeIndex = 0;
 		for(int i=0; i<GAResultInt.length; i++){
-			if(GAResultInt[i] > instance.getCustomersNr()){
+			if(GAResultInt[i] >= instance.getCustomersNr()){
 				evaluateRoute(routes[0][vehicleIndex]);
 				vehicleIndex++;
 				routeIndex = 0;
 			}else {
-				//Select customer number (GAResult[i]-1)
 				for(int j=0; j<instance.getDepot(0).getAssignedCustomersNr(); j++){
 					if(instance.getDepot(0).getAssignedCustomer(j).getNumber() == (GAResultInt[i])){
 						customerChosenPtr = instance.getDepot(0).getAssignedCustomer(j);

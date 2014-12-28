@@ -15,6 +15,14 @@ public class GAFitnessFunction {
 		double[] arrivalTimes = new double[instance.getCustomersNr()];
 		Customer firstCustomer, secondCustomer;
 		
+		for(int i=0; i<vehicleTime.length; i++){
+			vehicleTime[i] = 0;
+		}
+		
+		for(int i=0; i<arrivalTimes.length; i++){
+			arrivalTimes[i] = 0;
+		}
+		
 		//for(int j=0; j<instance.getCustomersNr(); j++)
 			//System.out.print(" " + chr[j] + " ");
 		
@@ -29,13 +37,17 @@ public class GAFitnessFunction {
 					firstCustomer = getCustomer(chr[currentGeneIndex]);
 					double x1 = firstCustomer.getXCoordinate();
 					double y1 = firstCustomer.getYCoordinate();
+					double t1 = firstCustomer.getEndTw() - (firstCustomer.getEndTw() - firstCustomer.getStartTw()); //Midpoint of the time window
 					double x2 = instance.getDepot(0).getXCoordinate();
 					double y2 = instance.getDepot(0).getYCoordinate();
-				
+					double t2 = instance.getDepot(0).getEndTw() - (instance.getDepot(0).getEndTw() - instance.getDepot(0).getStartTw());
+					
 					double distance = Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2);
+					double twDistance = Math.abs(t1 - t2);
 					arrivalTimes[chr[currentGeneIndex]] = vehicleTime[currentVehicleIndex] + distance;
 					vehicleTime[currentVehicleIndex] += distance + firstCustomer.getServiceDuration();
 					cost += distance;
+					cost += twDistance;
 					firstRouteCustomer = false;
 					
 				}else{
@@ -43,13 +55,17 @@ public class GAFitnessFunction {
 					secondCustomer = getCustomer(chr[currentGeneIndex-1]);
 					double x1 = firstCustomer.getXCoordinate();
 					double y1 = firstCustomer.getYCoordinate();
+					double t1 = firstCustomer.getEndTw() - (firstCustomer.getEndTw() - firstCustomer.getStartTw());
 					double x2 = secondCustomer.getXCoordinate();
 					double y2 = secondCustomer.getYCoordinate();
+					double t2 = secondCustomer.getEndTw() - (secondCustomer.getEndTw() - secondCustomer.getStartTw());
 				
 					double distance = Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2);
+					double twDistance = Math.abs(t1 - t2);
 					arrivalTimes[chr[currentGeneIndex]] = vehicleTime[currentVehicleIndex] + distance;
 					vehicleTime[currentVehicleIndex] += distance + firstCustomer.getServiceDuration();
 					cost += distance;
+					cost += twDistance;
 				}
 				
 				cost += firstCustomer.getCapacity();

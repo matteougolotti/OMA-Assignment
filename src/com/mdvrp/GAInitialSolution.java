@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import com.TabuSearch.MySolution;
 import com.softtechdesign.ga.ChromStrings;
 import com.softtechdesign.ga.Chromosome;
 import com.softtechdesign.ga.Crossover;
@@ -35,11 +36,11 @@ public class GAInitialSolution extends GAStringsSeq {
 				300, //population has N chromosomes (eventualmente parametrizzabile)
 				//togliamo il primo veicolo che utilizziamo
                 0.7, //crossover probability
-                0, //random selection chance % (regardless of fitness)
-                30, //max generations
+                10,//0, //random selection chance % (regardless of fitness)
+                1000, //max generations
                 0, //num prelim runs (to build good breeding stock for final/full run)
                 25, //max generations per prelim run
-                0.06, //chromosome mutation prob.
+                0.1,//0.06, //chromosome mutation prob.
                 0, //number of decimal places in chrom
                 genes, //gene space (possible gene values)
                 Crossover.ctOnePoint,//ctTwoPoint, //crossover type
@@ -350,7 +351,7 @@ public class GAInitialSolution extends GAStringsSeq {
 			GAResultInt[i] = Integer.valueOf(chromosome[i]);
 		}
 		
-		return 1/f.getFitness(GAResultInt, MDVRPTWGA.instance.getCustomersNr());
+		return 1000000 - f.getFitness(GAResultInt, MDVRPTWGA.instance.getCustomersNr());
 		
 		//return 1/mySolution.getCost().getTotalCost();
 		//return Math.random();
