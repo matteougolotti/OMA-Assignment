@@ -513,9 +513,13 @@ public class GAInitialSolution extends GAStringsSeq {
 					geneIndex++;
 					customers++;
 				}
-				off1.setGene(String.valueOf(veichle), geneIndex);
-				geneIndex++;
-				veichle++;			
+				if(veichle < chromosomeDim)//se non sono nell'ultima rotta aggiungo il prossimo veicolo
+				{	
+					off1.setGene(String.valueOf(veichle), geneIndex);
+					geneIndex++;
+					veichle++;
+				}
+							
 			}
 			routeIndex++;
 			//altrimenti vado avanti e uso un'altra route
