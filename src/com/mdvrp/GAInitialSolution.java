@@ -1,6 +1,11 @@
 package com.mdvrp;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -43,7 +48,7 @@ public class GAInitialSolution extends GAStringsSeq {
                 0.1,//0.06, //chromosome mutation prob.
                 0, //number of decimal places in chrom
                 genes, //gene space (possible gene values)
-                Crossover.ctOnePoint,//ctTwoPoint, //crossover type
+                Crossover.ctTwoPoint,//ctTwoPoint, //crossover type
                 true); //compute statisitics?
 	}
 
@@ -240,19 +245,19 @@ public class GAInitialSolution extends GAStringsSeq {
 		this.getChromosome(iChromIndex).setGene(temp, SecondGene);
 	}
 	
-	@Override
+	/*@Override //doTwoPtCrossover di Matteo simile ad una mutazione
 	protected void doTwoPtCrossover(Chromosome Chrom1, Chromosome Chrom2){
 		ChromStrings chr1 = (ChromStrings)Chrom1;
 		ChromStrings chr2 = (ChromStrings)Chrom2;
 		
-		/*ipotesi farlo per più volte*/
+		//ipotesi farlo per più volte
 		
 		int t1 = myGetRandom(chromosomeDim-2);
 		
 		String s = chr1.getGene(t1);
 		int t2 = 0;
 		for(int i = 0; i<chromosomeDim; i++){
-			if(chr2.getGene(i).equals(s)){/*t2->i*/
+			if(chr2.getGene(i).equals(s)){//t2->i
 				t2 = i;
 				break;
 			}
@@ -265,7 +270,7 @@ public class GAInitialSolution extends GAStringsSeq {
 		s = chr2.getGene(t1);
 		chr2.setGene(chr2.getGene(t2), t1);
 		chr2.setGene(s, t2);
-	}
+	}*/
 	
 	@Override
 	protected void doOnePtCrossover(Chromosome Chrom1, Chromosome Chrom2)
@@ -372,5 +377,220 @@ public class GAInitialSolution extends GAStringsSeq {
 		}
 		
 	}
+	
+	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see com.softtechdesign.ga.GAStringsSeq#doTwoPtCrossover(com.softtechdesign.ga.Chromosome, com.softtechdesign.ga.Chromosome)
+	 * idea: crossover che tenga conto delle route 
+	 */
+	protected void doTwoPtCrossover(Chromosome Chrom1, Chromosome Chrom2){	
+		
+		//lista delle rotte
+		List<Set<String>> routes = new ArrayList<Set<String>>();
+		routes.add(0, new HashSet<String>());
+		routes.add(1, new HashSet<String>());
+		
+		//lista dei costi
+		List<Double> routesCosts = new ArrayList<Double>();
+		routesCosts.add(0, 0.0);
+		routesCosts.add(1, 0.0);
+		
+		ChromStrings off1 = new ChromStrings(chromosomeDim);
+		ChromStrings off2 = new ChromStrings(chromosomeDim);
+		ChromStrings par1 = (ChromStrings)Chrom1;
+		ChromStrings par2 = (ChromStrings)Chrom2;
+		
+		//creo una lista con le route dei due parenti ed una con il loro costo
+		boolean inRoutePar1 = false;
+		boolean inRoutePar2 = false;
+		int routesIndex = 1;
+		int routeIndexPar1 = 0;
+		int routeIndexPar2 = 1;
+		
+		for(int i = 0; i<chromosomeDim; i++)
+		{
+			//controllo se sono in una route oppure no
+			if(Integer.valueOf(par1.getGene(i))>=MDVRPTWGA.instance.getCustomersNr())
+			{
+				//calcolo il costo della route precedente
+				GAFitnessFunction f = new GAFitnessFunction();
+				
+				//creazione array di int
+				Object [] routesObj = routes.get(routeIndexPar1).toArray();
+				int [] routesInt = new int[routesObj.length];
+				for(int j = 0 ; j< routesObj.length; j++)
+				{
+					routesInt[j] =Integer.parseInt(String.valueOf(routesObj[j]));
+				}
+				
+				Double cost = 1/f.getFitness(routesInt, MDVRPTWGA.instance.getCustomersNr());
+				routesCosts.add(routeIndexPar1, cost);
+				//non sono in una route quindi creo una nuova route di par1
+				inRoutePar1 = false;
+				routesIndex ++;
+				routeIndexPar1 = routesIndex;	
+				routes.add(routesIndex, new HashSet<String>());
+			}
+			else//sono in una route
+				inRoutePar1 = true;
+			
+			if(Integer.valueOf(par2.getGene(i))>=MDVRPTWGA.instance.getCustomersNr())
+			{
+				//calcolo il costo della route precedente
+				GAFitnessFunction f = new GAFitnessFunction();
+				
+				//creazione array di int
+				Object [] routesObj = routes.get(routeIndexPar2).toArray();
+				int [] routesInt = new int[routesObj.length];
+				for(int j = 0 ; j< routesObj.length; j++)
+				{
+					routesInt[j] =Integer.parseInt(String.valueOf(routesObj[j]));
+				}
+				
+				Double cost = 1/f.getFitness(routesInt, MDVRPTWGA.instance.getCustomersNr());
+				routesCosts.add(routeIndexPar2, cost);
+				
+				//non sono in una route quindi creo una nuova route di par2
+				inRoutePar2 = false;
+				routesIndex ++;
+				routeIndexPar2 = routesIndex;
+				routes.add(routesIndex, new HashSet<String>());
+			}
+			else//sono in una route
+				inRoutePar2 = true;
+			
+			if(inRoutePar1)
+			{
+				//aggiungo client alla route di par1 e aggiorno il costo
+				routes.get(routeIndexPar1).add(par1.getGene(i));
+			}
+			if(inRoutePar2)
+			{
+				//aggiungo client alla route di par2  e aggiorno il costo
+				routes.get(routeIndexPar2).add(par2.getGene(i));
+			}
+		}
+		
+		//ordinamento routes per costo crescente
+		SortAscendent(routes,routesCosts);	
+		//creazione nuovi figli assemblando le routes
+		Chrom1 = CreateOffspring((ChromStrings)Chrom1,routes);
+		
+		//ordinamento routes per costo decrescente
+		SortDescendent(routes,routesCosts);
+		//creazione nuovi figli assemblando le routes
+		Chrom2 = CreateOffspring((ChromStrings)Chrom2,routes);
+		
+		
+	}
+
+	private ChromStrings CreateOffspring(ChromStrings off1, List<Set<String>> routes) {
+		// TODO Auto-generated method stub
+		int customers = 0;
+		int routeIndex = 0;
+		int geneIndex = 0;
+		int veichle = MDVRPTWGA.instance.getCustomersNr();
+		Set<String> used = new HashSet<String>();
+		while(customers<MDVRPTWGA.instance.getCustomersNr() && routeIndex<routes.size())
+		{
+			int conta = 0;//flag contatore duplicati
+			
+			if(routes.get(routeIndex).size()<1)
+				conta++;
+			for(int i=0; i<routes.get(routeIndex).size() && conta<1;i++)//controllo se la route contiene dei custumers utilizzati
+			{
+				if(used.contains(routes.get(routeIndex).toArray()[i]))
+					conta++;
+			}
+			if(conta <1)//se non ho ancora inserito nessun dei customer aggiungo la rotta
+			{
+				for(int i=0; i<routes.get(routeIndex).size();i++)
+				{
+					String gene = (String) routes.get(routeIndex).toArray()[i];
+					off1.setGene(gene, geneIndex);
+					used.add(gene);
+					geneIndex++;
+					customers++;
+				}
+				off1.setGene(String.valueOf(veichle), geneIndex);
+				geneIndex++;
+				veichle++;			
+			}
+			routeIndex++;
+			//altrimenti vado avanti e uso un'altra route
+		}
+		//quando esco inserisco i customers e i veicoli rimanenti
+		if(customers<MDVRPTWGA.instance.getCustomersNr())//controllo di aver messo tutti i customer
+		{
+			for(int i=0; i<MDVRPTWGA.instance.getCustomersNr();i++)
+			{
+				String gene = String.valueOf(i);
+				if(!used.contains(gene))
+				{
+					off1.setGene(gene, geneIndex);
+					geneIndex++;
+					customers++;
+				}	
+			}
+		}
+		if(veichle<chromosomeDim)//controllo di aver messo tutti i veicoli
+		{
+			while(veichle<chromosomeDim)
+			{
+				off1.setGene(String.valueOf(veichle), geneIndex);
+				geneIndex++;
+				veichle++;
+			}	
+		}
+		return off1;
+	}
+
+
+	private void SortAscendent(List<Set<String>> routes, List<Double> routesCosts) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i<routes.size() ; i++)
+		{
+			for(int j = 0; j< routes.size() ; j++)
+			{
+				
+				if(routesCosts.get(i)<routesCosts.get(j))
+				{
+					//swap costs
+					Double tmp1 = routesCosts.get(i);
+					routesCosts.set(i, routesCosts.get(j));
+					routesCosts.set(j, tmp1);
+					//swap routes
+					Set<String> tmp2 = new HashSet<String>();
+					tmp2 = (routes.get(i));
+					routes.set(i, routes.get(j));
+					routes.set(j, tmp2);
+				}
+			}
+		}
+	}
+	private void SortDescendent(List<Set<String>> routes, List<Double> routesCosts) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i<routes.size() ; i++)
+		{
+			for(int j = 0; j< routes.size() ; j++)
+			{
+				
+				if(routesCosts.get(i)>routesCosts.get(j))
+				{
+					//swap costs
+					Double tmp1 = routesCosts.get(i);
+					routesCosts.set(i, routesCosts.get(j));
+					routesCosts.set(j, tmp1);
+					//swap routes
+					Set<String> tmp2 = new HashSet<String>();
+					tmp2 = (routes.get(i));
+					routes.set(i, routes.get(j));
+					routes.set(j, tmp2);
+				}
+			}
+		}
+	}
+	
 	
 }
