@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class TEST {
 //public static MDVRPTWGA GA;	
-private static int MAX = 50;
+private static int MAX = 10;
 private static Duration d = new Duration();
 	
 	public static void main(String[] args) throws IOException {
@@ -12,16 +12,16 @@ private static Duration d = new Duration();
 			long minutes=0;
 			long seconds=0;
 			
-			int n = args.length/2;
+			int n = args.length-1;
 		
 			d.start();
-			for(int j = 0; j<n; j+=2)
+			for(int j = 1; j<n; j++)
 			{
 				for(int i = 0; i < MAX; i++)
 				{
 					String[] file = new String[2];
 					file[0]="-if";
-					file[1]=args[j+1];
+					file[1]=args[j];
 					MDVRPTWGA.main(file);
 					d.stop();
 					seconds += d.getSeconds();
